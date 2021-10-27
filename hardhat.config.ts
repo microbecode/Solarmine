@@ -2,7 +2,7 @@
 
 import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
-//require('hardhat-gas-reporter')
+//import "hardhat-gas-reporter";
 //require('solidity-coverage')
 
 // This is a sample Hardhat task. To learn how to create your own go to
