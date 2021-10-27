@@ -5,7 +5,8 @@ import "hardhat/console.sol";
 
 contract MyToken is ERC20 {
     address[] public tokenHolders;
-    mapping(address => uint256) internal tokenHolderIndex; // plus one, to avoid using zero as first index
+    mapping(address => bool) internal tokenHolderExists;
+    mapping(address => uint256) internal tokenHolderArrayIndex;
 
     constructor(
         uint256 initialBalance,
@@ -33,22 +34,32 @@ contract MyToken is ERC20 {
     // https://ethereum.stackexchange.com/a/12707/31933
     function scalableAddTokenHolder(address tokenHolder) internal {
         //console.log("index %s", tokenHolderIndex[tokenHolder]);
-        if (tokenHolderIndex[tokenHolder] == 0) {
+        if (!tokenHolderExists[tokenHolder]) {
             // doesn't exist
             tokenHolders.push(tokenHolder);
-            tokenHolderIndex[tokenHolder] = tokenHolders.length;
+            tokenHolderExists[tokenHolder] = true;
+            tokenHolderArrayIndex[tokenHolder] = tokenHolders.length - 1;
         }
     }
 
     function removeTokenHolder(address tokenHolder) internal {
-        if (tokenHolderIndex[tokenHolder] > 0) {
-            // doesn't exist
+        if (tokenHolderExists[tokenHolder]) {
+            // exists
+
+            address lastHolder = tokenHolders[tokenHolders.length - 1];
             // Move the last entry to replace this entry
-            tokenHolders[tokenHolderIndex[tokenHolder] - 1] = tokenHolders[
-                tokenHolders.length - 1
-            ];
+            tokenHolders[tokenHolderArrayIndex[tokenHolder]] = lastHolder;
             tokenHolders.pop(); // remove last entry
-            delete tokenHolderIndex[tokenHolder];
+
+            // Update index for the moved holder
+            tokenHolderArrayIndex[lastHolder] = tokenHolderArrayIndex[
+                tokenHolder
+            ];
+
+            // Remove index
+            delete tokenHolderArrayIndex[tokenHolder];
+            // Mark as non-existing
+            tokenHolderExists[tokenHolder] = false;
         }
     }
 

@@ -121,16 +121,37 @@ describe("Token", function () {
     await token.transfer(user3.address, 5);
     expect((await token.getHolders()).length).to.equal(4);
 
-    await token.connect(user2).transfer(user1.address, 3);
+    await token.connect(user2).transfer(user1.address, 3); // transfer some to existing
     expect((await token.getHolders()).length).to.equal(4);
 
-    await token.connect(user1).transfer(user2.address, 6);
+    await token.connect(user1).transfer(user2.address, 6); // transfer all to existing
     expect((await token.getHolders()).length).to.equal(3);
 
     let holders = await token.getHolders();
     expect(holders[0]).to.equal(owner.address);
     expect(holders[1]).to.equal(user3.address);
     expect(holders[2]).to.equal(user2.address);
+
+    await token.connect(user3).transfer(user2.address, 5); // transfer all to existing
+    expect((await token.getHolders()).length).to.equal(2);
+
+    await token.connect(user2).transfer(user1.address, 4); // transfer some to new
+    expect((await token.getHolders()).length).to.equal(3);
+
+    await token.connect(user2).transfer(user3.address, 1); // transfer all to new
+    expect((await token.getHolders()).length).to.equal(4);
+
+    await token.connect(user3).transfer(user2.address, 1); // transfer all to existing
+    expect((await token.getHolders()).length).to.equal(3);
+
+    await token.connect(user1).transfer(owner.address, 4); // transfer all to existing
+    expect((await token.getHolders()).length).to.equal(2);
+
+    await token.connect(owner).transfer(user1.address, 4); // transfer some to new
+    expect((await token.getHolders()).length).to.equal(3);
+
+    await token.connect(user2).transfer(user1.address, 8); // transfer all to existing
+    expect((await token.getHolders()).length).to.equal(2);
   });
 });
 
