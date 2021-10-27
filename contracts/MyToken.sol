@@ -4,9 +4,9 @@ import "./token/ERC20/ERC20.sol";
 import "hardhat/console.sol";
 
 contract MyToken is ERC20 {
-    address[] public tokenHolders;
-    mapping(address => bool) internal tokenHolderExists;
-    mapping(address => uint256) internal tokenHolderArrayIndex;
+    address[] internal _tokenHolders;
+    mapping(address => bool) internal _tokenHolderExists;
+    mapping(address => uint256) internal _tokenHolderArrayIndex;
 
     constructor(
         uint256 initialBalance,
@@ -14,7 +14,7 @@ contract MyToken is ERC20 {
         string memory symbol
     ) ERC20(name, symbol) {
         _mint(_msgSender(), initialBalance);
-        scalableAddTokenHolder(_msgSender());
+        _addTokenHolder(_msgSender());
     }
 
     function _afterTokenTransfer(
@@ -24,46 +24,46 @@ contract MyToken is ERC20 {
     ) internal override {
         //console.log("transfer of %s", amount);
         if (amount > 0) {
-            scalableAddTokenHolder(to);
+            _addTokenHolder(to);
         }
         if (balanceOf(from) == 0) {
-            removeTokenHolder(from);
+            _removeTokenHolder(from);
         }
     }
 
     // https://ethereum.stackexchange.com/a/12707/31933
-    function scalableAddTokenHolder(address tokenHolder) internal {
+    function _addTokenHolder(address tokenHolder) internal {
         //console.log("index %s", tokenHolderIndex[tokenHolder]);
-        if (!tokenHolderExists[tokenHolder]) {
+        if (!_tokenHolderExists[tokenHolder]) {
             // doesn't exist
-            tokenHolders.push(tokenHolder);
-            tokenHolderExists[tokenHolder] = true;
-            tokenHolderArrayIndex[tokenHolder] = tokenHolders.length - 1;
+            _tokenHolders.push(tokenHolder);
+            _tokenHolderExists[tokenHolder] = true;
+            _tokenHolderArrayIndex[tokenHolder] = _tokenHolders.length - 1;
         }
     }
 
-    function removeTokenHolder(address tokenHolder) internal {
-        if (tokenHolderExists[tokenHolder]) {
+    function _removeTokenHolder(address tokenHolder) internal {
+        if (_tokenHolderExists[tokenHolder]) {
             // exists
 
-            address lastHolder = tokenHolders[tokenHolders.length - 1];
+            address lastHolder = _tokenHolders[_tokenHolders.length - 1];
             // Move the last entry to replace this entry
-            tokenHolders[tokenHolderArrayIndex[tokenHolder]] = lastHolder;
-            tokenHolders.pop(); // remove last entry
+            _tokenHolders[_tokenHolderArrayIndex[tokenHolder]] = lastHolder;
+            _tokenHolders.pop(); // remove last entry
 
             // Update index for the moved holder
-            tokenHolderArrayIndex[lastHolder] = tokenHolderArrayIndex[
+            _tokenHolderArrayIndex[lastHolder] = _tokenHolderArrayIndex[
                 tokenHolder
             ];
 
             // Remove index
-            delete tokenHolderArrayIndex[tokenHolder];
+            delete _tokenHolderArrayIndex[tokenHolder];
             // Mark as non-existing
-            tokenHolderExists[tokenHolder] = false;
+            _tokenHolderExists[tokenHolder] = false;
         }
     }
 
     function getHolders() public view returns (address[] memory) {
-        return tokenHolders;
+        return _tokenHolders;
     }
 }
