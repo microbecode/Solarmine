@@ -1,16 +1,17 @@
 pragma solidity ^0.8.0;
 
-import "./token/ERC20/IERC20.sol";
+import "./IMyToken.sol";
 
 contract Rewards {
-    IERC20 private _underlying;
+    IMyToken private _underlying;
 
     constructor(address underlying) {
-        _underlying = IERC20(underlying);
+        _underlying = IMyToken(underlying);
     }
 
     function notifyRewards() public payable {
-        for (uint256 a = 0; a < 500; a++) {
+        address[] memory holders = _underlying.tokenHolders();
+        for (uint256 a = 0; a < holders.length; a++) {
             // TODO: what if receiver reverts
             (bool success, ) = address(_underlying).call{value: a, gas: 3000}(
                 ""
