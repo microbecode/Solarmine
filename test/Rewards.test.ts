@@ -232,43 +232,45 @@ describe("Rewards", function () {
 
     expect(contrBal).to.gt(zero);
   });
-  /* 
-  it("No access", async function () {
-    await expect(
-      minter
-        .connect(staker1)
-        .setNFTAddresses(nftFirst.address, nftSecond.address, nftThird.address)
-    ).to.be.revertedWith("Only the contract owner may perform this action");
 
-    await expect(
-      minter.connect(staker1).whitelist(1, owner.address)
-    ).to.be.revertedWith("Only the contract owner may perform this action");
+  it("Dust is reused", async function () {
+    const reward = 10000;
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(user2.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
 
-    await expect(
-      nftFirst.connect(owner).mint(owner.address)
-    ).to.be.revertedWith("Only minting contract can mint");
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+    const user2Bal = await ethers.provider.getBalance(user2.address);
+    const contrBal = await ethers.provider.getBalance(rewards.address);
 
-    await expect(
-      nftFirst.connect(staker1).mint(owner.address)
-    ).to.be.revertedWith("Only minting contract can mint");
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward * 3).add(BigNumber.from(reward.toFixed(0))));
+    expect(user1Bal).to.equal(initialBalanceUser1.add(reward.toFixed(0)));
+    expect(user2Bal).to.equal(initialBalanceUser2.add(reward.toFixed(0)));
 
-    await expect(
-      nftSecond.connect(staker1).mint(owner.address)
-    ).to.be.revertedWith("Only minting contract can mint");
-
-    await expect(
-      nftThird.connect(staker1).mint(owner.address)
-    ).to.be.revertedWith("Only minting contract can mint");
+    expect(contrBal).to.eq(zero);
   });
 
-  it("No claiming without whitelist", async function () {
-    await minter.claimNFTs();
-    await expectInitial();
+  it("User removed, no longer gets rewards", async function () {
+    const reward = 10000;
+    const third = parseInt((reward / 3).toFixed(0));
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(user2.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await token.connect(user1).transfer(user2.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
 
-    const amIEligible = await minter.amIEligible();
-    const amIEligible2 = await minter.connect(staker1).amIEligible();
-    expect(amIEligible).to.equal(false);
-    expect(amIEligible2).to.equal(false);
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+    const user2Bal = await ethers.provider.getBalance(user2.address);
+    const contrBal = await ethers.provider.getBalance(rewards.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward * 2).add(third * 2));
+    expect(user1Bal).to.equal(initialBalanceUser1.add(third));
+    expect(user2Bal).to.equal(initialBalanceUser2.add(third + parseInt(((reward / 3) * 2).toFixed(0))));
+
+    expect(contrBal).to.gt(zero);
   });
- */
 });
