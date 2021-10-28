@@ -17,6 +17,11 @@ This repository is implemented with Solidity on top of an Ethereum framework. Th
 * Hardhat for local execution and test environment
 * Chai/Mocha/Waffle/Ethers for unit tests
 
+### Installation
+
+To start using this repository, you'll need to have `yarn` installed.
+After that, you should be able to just go to the root directory and write `yarn` and it'll download the required packages.
+
 ## Smart contracts
 
 ### MyToken
