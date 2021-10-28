@@ -8,6 +8,8 @@ contract Rewards {
     address private _blacklisted; // the liquidity pool
     uint256 private _indexOfBlacklisted;
 
+    event ReceiverRefusedReward(address indexed);
+
     constructor(address underlying, address blacklistAddress) {
         _underlying = IMyToken(underlying);
         _blacklisted = blacklistAddress;
@@ -45,14 +47,13 @@ contract Rewards {
             //console.log("process for %s", holderAmount);
 
             for (uint256 i = 0; i < holderAmount; i++) {
-                /*    if (holders[i] == _blacklisted) {
-                    continue;
-                } */
                 uint256 bal = _underlying.balanceOf(holders[i]);
                 uint256 share = (toShare * bal) / supply;
                 //console.log("sharing %s", share);
-                // TODO: what if receiver reverts
                 (bool success, ) = holders[i].call{value: share, gas: 3000}("");
+                if (!success) {
+                    emit ReceiverRefusedReward(holders[i]);
+                }
             }
         }
     }

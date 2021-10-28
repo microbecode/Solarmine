@@ -163,6 +163,7 @@ describe("Rewards", function () {
   let accounts: SignerWithAddress[];
   let rewards: Contract;
   let token: Contract;
+  let reverter: Contract;
   let owner: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -172,6 +173,7 @@ describe("Rewards", function () {
   let initialBalanceUser1: BigNumber;
   let initialBalanceUser2: BigNumber;
   let initialBalanceBlacklist: BigNumber;
+  let initialBalanceReverter: BigNumber;
   const zero = ethers.BigNumber.from("0") as BigNumber;
   const tokenSupply = 600;
 
@@ -191,10 +193,15 @@ describe("Rewards", function () {
     rewards = await rewardsFact.deploy(token.address, blacklisted.address, { gasPrice: 0 });
     await rewards.deployed();
 
+    const reverterFact = await ethers.getContractFactory("ReverterMock");
+    reverter = await reverterFact.deploy({ gasPrice: 0 });
+    await reverter.deployed();
+
     initialBalanceOwner = await ethers.provider.getBalance(owner.address);
     initialBalanceUser1 = await ethers.provider.getBalance(user1.address);
     initialBalanceUser2 = await ethers.provider.getBalance(user2.address);
     initialBalanceBlacklist = await ethers.provider.getBalance(blacklisted.address);
+    initialBalanceReverter = await ethers.provider.getBalance(reverter.address);
   });
 
   it("Single holder, gets all rewards", async function () {
@@ -329,5 +336,23 @@ describe("Rewards", function () {
     expect(ownerBal).to.equal(initialBalanceOwner.sub(reward).add(reward / 2));
     expect(blackBal).to.equal(initialBalanceBlacklist);
     expect(user1Bal).to.equal(initialBalanceUser1.add(reward / 2));
+  });
+
+  it("Using a reverter address simply ignores the revert", async function () {
+    const reward = 10000;
+    const third = parseInt((reward / 3).toFixed(0));
+    await token.transfer(reverter.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const reverterBal = await ethers.provider.getBalance(reverter.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+    const contrBal = await ethers.provider.getBalance(rewards.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward).add(third));
+    expect(reverterBal).to.equal(initialBalanceReverter);
+    expect(user1Bal).to.equal(initialBalanceUser1.add(third));
+    expect(contrBal).to.be.closeTo(BigNumber.from(third.toString()), 1);
   });
 });
