@@ -2,7 +2,6 @@ import { ethers, network, waffle } from "hardhat";
 import { BigNumber, Contract, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
-//import { deployContract } from "waffle";
 require("@nomiclabs/hardhat-waffle");
 
 describe("Token", function () {
