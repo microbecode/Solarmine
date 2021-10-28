@@ -167,10 +167,11 @@ describe("Rewards", function () {
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
   let user3: SignerWithAddress;
+  let blacklisted: SignerWithAddress;
   let initialBalanceOwner: BigNumber;
   let initialBalanceUser1: BigNumber;
   let initialBalanceUser2: BigNumber;
-  let initialBalanceUser3: BigNumber;
+  let initialBalanceBlacklist: BigNumber;
   const zero = ethers.BigNumber.from("0") as BigNumber;
   const tokenSupply = 600;
 
@@ -180,19 +181,20 @@ describe("Rewards", function () {
     user1 = accounts[1];
     user2 = accounts[2];
     user3 = accounts[3];
+    blacklisted = accounts[4];
 
     const tokenFact = await ethers.getContractFactory("MyToken");
     token = await tokenFact.deploy(tokenSupply, "", "", { gasPrice: 0 });
     await token.deployed();
 
     const rewardsFact = await ethers.getContractFactory("Rewards");
-    rewards = await rewardsFact.deploy(token.address, { gasPrice: 0 });
+    rewards = await rewardsFact.deploy(token.address, blacklisted.address, { gasPrice: 0 });
     await rewards.deployed();
 
     initialBalanceOwner = await ethers.provider.getBalance(owner.address);
     initialBalanceUser1 = await ethers.provider.getBalance(user1.address);
     initialBalanceUser2 = await ethers.provider.getBalance(user2.address);
-    initialBalanceUser3 = await ethers.provider.getBalance(user3.address);
+    initialBalanceBlacklist = await ethers.provider.getBalance(blacklisted.address);
   });
 
   it("Single holder, gets all rewards", async function () {
@@ -272,5 +274,60 @@ describe("Rewards", function () {
     expect(user2Bal).to.equal(initialBalanceUser2.add(third + parseInt(((reward / 3) * 2).toFixed(0))));
 
     expect(contrBal).to.gt(zero);
+  });
+
+  /*   it("20 users", async function () {
+    const reward = 10000;
+
+    for (let i = 0; i < accounts.length; i++) {
+      await token.transfer(accounts[i].address, tokenSupply / accounts.length, { gasPrice: 0 });
+    }
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+  }); */
+
+  it("Blacklisting skips with two", async function () {
+    const reward = 10000;
+    await token.transfer(blacklisted.address, tokenSupply / 2, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const blackBal = await ethers.provider.getBalance(blacklisted.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward).add(reward));
+    expect(blackBal).to.equal(initialBalanceBlacklist);
+  });
+
+  it("Blacklisting skips with multiple", async function () {
+    const reward = 10000;
+    await token.transfer(blacklisted.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const blackBal = await ethers.provider.getBalance(blacklisted.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward).add(reward / 2));
+    expect(blackBal).to.equal(initialBalanceBlacklist);
+    expect(user1Bal).to.equal(initialBalanceUser1.add(reward / 2));
+  });
+
+  it("Blacklisting skips with multiple, different order", async function () {
+    const reward = 10000;
+
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(blacklisted.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.notifyRewards({ value: reward, gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const blackBal = await ethers.provider.getBalance(blacklisted.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward).add(reward / 2));
+    expect(blackBal).to.equal(initialBalanceBlacklist);
+    expect(user1Bal).to.equal(initialBalanceUser1.add(reward / 2));
   });
 });
