@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import "./IMyToken.sol";
 import "hardhat/console.sol";
 
+// TODO: cleanup the code
 contract Rewards {
     IMyToken private _underlying;
     address private _blacklisted; // the liquidity pool

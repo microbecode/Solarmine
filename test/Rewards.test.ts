@@ -5,7 +5,7 @@ import { expect } from "chai";
 require("@nomiclabs/hardhat-waffle");
 
 describe("Token", function () {
-  /*let accounts: SignerWithAddress[];
+  let accounts: SignerWithAddress[];
   let rewards: Contract;
   let token: Contract;
   let owner: SignerWithAddress;
@@ -155,7 +155,7 @@ describe("Token", function () {
     holders = await token.getHolders();
     // no tokens lost on the way
     expect((await token.balanceOf(holders[0])).add(await token.balanceOf(holders[1]))).to.equal(tokenSupply);
-  });*/
+  });
 });
 
 describe("Rewards", function () {
