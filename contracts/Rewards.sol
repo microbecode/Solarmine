@@ -18,12 +18,12 @@ contract Rewards {
 
     function notifyRewards() public payable {
         uint256 toShare = address(this).balance;
+        //console.log("black has %s", _underlying.balanceOf(_blacklisted));
         if (toShare > 0) {
             address[] memory holders = _underlying.getHolders();
             uint256 supply = _underlying.totalSupply();
-            uint256 holderAmount = holders.length;
 
-            uint256 startIndex = 0;
+            //uint256 startIndex = 0;
             /*             if (
                 _indexOfBlacklisted > 0 &&
                 holders[_indexOfBlacklisted] == _blacklisted
@@ -33,27 +33,31 @@ contract Rewards {
             } */
 
             // Remove the effect of the blacklisted address
-            for (startIndex; startIndex < holderAmount; startIndex++) {
-                if (holders[startIndex] == _blacklisted) {
-                    // replace the entry with the last entry
-                    holders[startIndex] = holders[holders.length - 1];
-                    holderAmount--; // don't process the last one
+            for (uint256 i = 0; i < holders.length; i++) {
+                if (holders[i] == _blacklisted) {
+                    // Set the address to someone who doesn't have tokens, so no rewards given
+                    holders[i] = address(0x1);
                     // Ignore the amount of the blacklisted address
                     supply -= _underlying.balanceOf(_blacklisted);
-                    _indexOfBlacklisted = startIndex;
+                    //_indexOfBlacklisted = i;
                     break;
                 }
             }
 
             //console.log("process for %s", holderAmount);
 
-            for (uint256 i = 0; i < holderAmount; i++) {
+            for (uint256 i = 0; i < holders.length; i++) {
                 uint256 bal = _underlying.balanceOf(holders[i]);
-                uint256 share = (toShare * bal) / supply;
-                //console.log("sharing %s", share);
-                (bool success, ) = holders[i].call{value: share, gas: 3000}("");
-                if (!success) {
-                    emit ReceiverRefusedReward(holders[i]);
+                // Relevant check only for the blacklisted address
+                if (bal > 0) {
+                    uint256 share = (toShare * bal) / supply;
+                    //console.log("sharing %s", share);
+                    (bool success, ) = holders[i].call{value: share, gas: 3000}(
+                        ""
+                    );
+                    if (!success) {
+                        emit ReceiverRefusedReward(holders[i]);
+                    }
                 }
             }
         }
