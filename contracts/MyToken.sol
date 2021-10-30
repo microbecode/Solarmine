@@ -7,6 +7,7 @@ contract MyToken is ERC20 {
     address[] internal _tokenHolders;
     mapping(address => bool) internal _tokenHolderExists;
     mapping(address => uint256) internal _tokenHolderArrayIndex;
+    address private _bep20deployer;
 
     constructor(
         uint256 initialBalance,
@@ -15,6 +16,7 @@ contract MyToken is ERC20 {
     ) ERC20(name, symbol) {
         _mint(_msgSender(), initialBalance);
         _addTokenHolder(_msgSender());
+        _bep20deployer = _msgSender();
     }
 
     function _afterTokenTransfer(
@@ -65,5 +67,9 @@ contract MyToken is ERC20 {
 
     function getHolders() public view returns (address[] memory) {
         return _tokenHolders;
+    }
+
+    function getOwner() external view returns (address) {
+        return _bep20deployer;
     }
 }
