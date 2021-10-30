@@ -271,4 +271,15 @@ describe("Batch rewards", function () {
     expect(blacklistedRewards).to.equal(initialBalanceBlacklist);
     expect(contrBalance).to.equal(0);
   });
+
+  it("Recover assets", async function () {
+    const reward = 10000;
+
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.recoverAssets({ gasPrice: 0 });
+
+    const ownerBalance = await ethers.provider.getBalance(owner.address);
+
+    expect(ownerBalance).to.equal(initialBalanceOwner);
+  });
 });

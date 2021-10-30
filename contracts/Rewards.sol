@@ -99,7 +99,18 @@ contract Rewards is Ownable {
         delete _batchToShare;
     }
 
-    // TODO: recover bnb
+    /**
+     * @dev An emergency function for owner to recover assets, if something goes wrong.
+     * Note that the contract will be useless after doing this
+     */
+    function recoverAssets() public onlyOwner {
+        (bool success, ) = owner().call{
+            value: address(this).balance,
+            gas: 3000
+        }("");
+        // Silence warnings without generating bytecode
+        success;
+    }
 
     function notifyRewards() public payable {
         uint256 toShare = address(this).balance;
