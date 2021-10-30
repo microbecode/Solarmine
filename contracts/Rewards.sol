@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "./IMyToken.sol";
-import "./access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 // TODO: cleanup the code
