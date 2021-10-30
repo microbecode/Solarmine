@@ -18,12 +18,16 @@ contract Rewards is Ownable {
     uint256 internal _batchCurrentIndex = 0;
 
     event ReceiverRefusedReward(address indexed);
+    event BatchCompleted();
 
     constructor(address underlying, address blacklistAddress) {
         _underlying = IMyToken(underlying);
         _blacklisted = blacklistAddress;
     }
 
+    /**
+    @dev Initiates a new batch run: stores a snapshot of the current token data
+    */
     function initiateBatch(uint256 batchSize) public payable {
         require(_batchSize == 0, "There is already a batch running");
         _batchToShare = address(this).balance;
@@ -41,9 +45,9 @@ contract Rewards is Ownable {
             );
             // Remove the effect of the blacklisted address
             if (_batchHolders[i] == _blacklisted) {
-                _batchHolders[i] = address(0x1);
                 // Ignore the amount of the blacklisted address
                 _batchSupply -= _underlying.balanceOf(_blacklisted);
+                // Set batch balance to zero, so no rewards given
                 _batchBalances[_batchHolders[i]] = 0;
             }
         }
@@ -62,12 +66,12 @@ contract Rewards is Ownable {
             // Relevant check only for the blacklisted address
             if (bal > 0) {
                 uint256 share = (_batchToShare * bal) / _batchSupply;
-                console.log(
+                /*       console.log(
                     "sharing %s to %s with balance %s",
                     share,
                     _batchHolders[_batchCurrentIndex],
                     bal
-                );
+                ); */
                 (bool success, ) = _batchHolders[_batchCurrentIndex].call{
                     value: share,
                     gas: 3000
@@ -82,6 +86,7 @@ contract Rewards is Ownable {
         // Check if all is done
         if (_batchCurrentIndex == _batchHolders.length) {
             resetBatch();
+            emit BatchCompleted();
         }
     }
 
@@ -89,7 +94,7 @@ contract Rewards is Ownable {
         delete _batchCurrentIndex;
         delete _batchSize;
         delete _batchHolders;
-        //delete _batchBalances; // TODO: figure out whether this is needed
+        //delete _batchBalances; // Not so trivial to delete, but also no need to delete
         delete _batchSupply;
         delete _batchToShare;
     }

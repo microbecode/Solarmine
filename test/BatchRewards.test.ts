@@ -50,6 +50,7 @@ describe("Batch rewards", function () {
     initialBalanceReverter = await ethers.provider.getBalance(reverter.address);
   });
 
+  // Generate addresses and send them tokens
   const giveTokens = async (holders: number, totalAmount: number) => {
     let prefixNum = ethers.BigNumber.from("10").pow(38);
     for (let i = 0; i < holders; i++) {
