@@ -58,11 +58,26 @@ First we reduce the balance of the blacklisted address, so for the calculations 
 
 #### Batch reward sending
 
-Since we are looping through all of the token holders, the solution doesn't fully scale if there are too many holders. Once a certain holder amount is reached, the distribution can't be executed anymore since its gas requirements are above the blockchain's block gas limit.
+Since we are looping through all of the token holders, the solution doesn't fully scale if there are too many holders. Once a certain holder amount is reached, the distribution can't be executed anymore since its gas requirements are above the blockchain's block gas limit. In BSC network, the limit is somewhere around 2000 token holders.
 
 To mitigate this issue, the rewards can be sent in batches.
 
-TODO: write documentation, and not implemented yet.
+There are two main phases in batch sending:
+1. Initiate the batch process (`initiateBatch` function), which does the following:
+  1. Takes a snapshot of the token's current data (token holders, their balances and stuff like that)
+  1. Ignores possibly blacklisted address for the reward calculations
+  1. Stores the given reward amount to be used for the batches
+  1. This function takes parameter `batchSize` which is the desired size for the batches. Also the rewards are given as `value` for the function
+1. Start processing the batches (`processBatch` function), which does the following:
+  1. Processes the next batch
+  1. Call this function as many times as needed until all of the batches are processed. Once the last batch is processed, event `BatchCompleted` is emitted and the batch process is ended. Also, calling this function without a running batch reverts the transaction.
+  1. This function takes no parameters
+
+**Example**
+
+Let's say there are 10 token holders and you want to distribute 100 rewards in 3 batches. You do the following:
+1. Call `initiateBatch` with *4* as the `batchSize`. The batches will therefore be: 4 + 4 + 2 (equals 10 token holders).
+1. Call `processBatch` three times
 
 ## Deployment
 
