@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "./IMyToken.sol";
@@ -53,9 +54,13 @@ contract Rewards is Ownable {
         }
     }
 
+    /**
+     * @dev Processes a started batch
+     */
     function processBatch() public {
         require(_batchSize > 0, "No batch running");
         uint256 currentStart = _batchCurrentIndex;
+        // Do while 1) we still have holders to process and 2) we haven't exceeded the batch size
         for (
             _batchCurrentIndex;
             _batchCurrentIndex < _batchHolders.length &&
@@ -63,7 +68,7 @@ contract Rewards is Ownable {
             _batchCurrentIndex++
         ) {
             uint256 bal = _batchBalances[_batchHolders[_batchCurrentIndex]];
-            // Relevant check only for the blacklisted address
+            // Check is relevant only for the blacklisted address
             if (bal > 0) {
                 uint256 share = (_batchToShare * bal) / _batchSupply;
                 /*       console.log(
@@ -85,12 +90,15 @@ contract Rewards is Ownable {
         }
         // Check if all is done
         if (_batchCurrentIndex == _batchHolders.length) {
-            resetBatch();
+            _resetBatch();
             emit BatchCompleted();
         }
     }
 
-    function resetBatch() private {
+    /**
+     * @dev Resets a batch run. Called internally when the batch is completed
+     */
+    function _resetBatch() private {
         delete _batchCurrentIndex;
         delete _batchSize;
         delete _batchHolders;
@@ -112,6 +120,9 @@ contract Rewards is Ownable {
         success;
     }
 
+    /**
+     * @dev Sends rewards to all holders without batch processing
+     */
     function notifyRewards() public payable {
         uint256 toShare = address(this).balance;
         //console.log("black has %s", _underlying.balanceOf(_blacklisted));
@@ -134,7 +145,7 @@ contract Rewards is Ownable {
 
         for (uint256 i = 0; i < holders.length; i++) {
             uint256 bal = _underlying.balanceOf(holders[i]);
-            // Relevant check only for the blacklisted address
+            // Check is relevant check only for the blacklisted address
             if (bal > 0) {
                 uint256 share = (toShare * bal) / supply;
                 //console.log("sharing %s", share);

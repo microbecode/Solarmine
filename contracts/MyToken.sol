@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -19,6 +20,9 @@ contract MyToken is ERC20 {
         _bep20deployer = _msgSender();
     }
 
+    /**
+     * @dev Triggered after a token transfer has occurred
+     */
     function _afterTokenTransfer(
         address from,
         address to,
@@ -33,7 +37,10 @@ contract MyToken is ERC20 {
         }
     }
 
-    // https://ethereum.stackexchange.com/a/12707/31933
+    /**
+     * @dev Add a token holder to the array (if not yet exists). Fully scalable
+     * Inspired by https://ethereum.stackexchange.com/a/12707/31933
+     */
     function _addTokenHolder(address tokenHolder) internal {
         //console.log("index %s", tokenHolderIndex[tokenHolder]);
         if (!_tokenHolderExists[tokenHolder]) {
@@ -44,10 +51,11 @@ contract MyToken is ERC20 {
         }
     }
 
+    /**
+     * @dev Remove a token holder from the array. Fully scalable
+     */
     function _removeTokenHolder(address tokenHolder) internal {
         if (_tokenHolderExists[tokenHolder]) {
-            // exists
-
             address lastHolder = _tokenHolders[_tokenHolders.length - 1];
             // Move the last entry to replace this entry
             _tokenHolders[_tokenHolderArrayIndex[tokenHolder]] = lastHolder;
@@ -69,6 +77,9 @@ contract MyToken is ERC20 {
         return _tokenHolders;
     }
 
+    /**
+     * @dev To make the token fully BEP-20 compatible. No real usage
+     */
     function getOwner() external view returns (address) {
         return _bep20deployer;
     }
