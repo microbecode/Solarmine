@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "hardhat/console.sol";
 
 contract MyToken is ERC20 {
     address[] internal _tokenHolders;
@@ -28,7 +27,6 @@ contract MyToken is ERC20 {
         address to,
         uint256 amount
     ) internal override {
-        //console.log("transfer of %s", amount);
         if (amount > 0) {
             _addTokenHolder(to);
         }
@@ -42,7 +40,6 @@ contract MyToken is ERC20 {
      * Inspired by https://ethereum.stackexchange.com/a/12707/31933
      */
     function _addTokenHolder(address tokenHolder) internal {
-        //console.log("index %s", tokenHolderIndex[tokenHolder]);
         if (!_tokenHolderExists[tokenHolder]) {
             // doesn't exist
             _tokenHolders.push(tokenHolder);

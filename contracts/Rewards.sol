@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./IMyToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 // TODO: cleanup the code
 contract Rewards is Ownable {
@@ -33,7 +32,6 @@ contract Rewards is Ownable {
         require(_batchSize == 0, "There is already a batch running");
         _batchToShare = address(this).balance;
         require(_batchToShare > 0, "There has to be some reward");
-        //console.log("black has %s", _underlying.balanceOf(_blacklisted));
 
         _batchSize = batchSize;
         _batchHolders = _underlying.getHolders();
@@ -71,12 +69,7 @@ contract Rewards is Ownable {
             // Check is relevant only for the blacklisted address
             if (bal > 0) {
                 uint256 share = (_batchToShare * bal) / _batchSupply;
-                /*       console.log(
-                    "sharing %s to %s with balance %s",
-                    share,
-                    _batchHolders[_batchCurrentIndex],
-                    bal
-                ); */
+
                 (bool success, ) = _batchHolders[_batchCurrentIndex].call{
                     value: share,
                     gas: 3000
@@ -125,7 +118,6 @@ contract Rewards is Ownable {
      */
     function notifyRewards() public payable {
         uint256 toShare = address(this).balance;
-        //console.log("black has %s", _underlying.balanceOf(_blacklisted));
         require(toShare > 0, "There has to be some reward");
         address[] memory holders = _underlying.getHolders();
         uint256 supply = _underlying.totalSupply();
@@ -141,14 +133,11 @@ contract Rewards is Ownable {
             }
         }
 
-        //console.log("process for %s", holderAmount);
-
         for (uint256 i = 0; i < holders.length; i++) {
             uint256 bal = _underlying.balanceOf(holders[i]);
             // Check is relevant check only for the blacklisted address
             if (bal > 0) {
                 uint256 share = (toShare * bal) / supply;
-                //console.log("sharing %s", share);
                 (bool success, ) = holders[i].call{value: share, gas: 3000}("");
                 if (!success) {
                     emit ReceiverRefusedReward(holders[i]);
