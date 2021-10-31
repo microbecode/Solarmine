@@ -89,6 +89,15 @@ describe("Batch rewards", function () {
     await expect(rewards.processBatch({ gasPrice: 0 })).to.be.revertedWith("No batch running");
   });
 
+  it("Single holder, gets all rewards", async function () {
+    const reward = 10000;
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch({ gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    expect(ownerBal).to.equal(initialBalanceOwner);
+  });
+
   it("One batch", async function () {
     const holderAmount = 10;
     const reward = 10000;
@@ -208,7 +217,7 @@ describe("Batch rewards", function () {
     expect(contrBalance).to.equal(0);
   });
 
-  it("One batch, start a new one with different holders", async function () {
+  it("One batch, start a new one with extra holders", async function () {
     const holderAmount = 10;
     const reward = 10000;
     await giveTokens(holderAmount, tokenSupply);
@@ -232,6 +241,85 @@ describe("Batch rewards", function () {
     expect(userPastMiddlePointRewards).to.equal(reward / (holderAmount * 2));
     expect(userLastRewards).to.equal(reward / (holderAmount * 2));
     expect(contrBalance).to.equal(0);
+  });
+
+  it("Three batches, start the second one with changed holders", async function () {
+    const holderAmount = 10;
+    const reward = 10000;
+    await giveTokens(holderAmount, tokenSupply);
+    const initialHolders = await token.getHolders();
+
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch();
+
+    // Remove all tokens and start from anew
+    for (let i = 0; i < initialHolders.length; i++) {
+      const bal = await token.balanceOf(initialHolders[i]);
+      await token.burn(initialHolders[i], bal);
+    }
+    await token.mint(owner.address, tokenSupply);
+    await giveTokens(holderAmount, tokenSupply);
+
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch();
+
+    const newHolders = await token.getHolders();
+
+    let userOld0Rewards = await ethers.provider.getBalance(initialHolders[0]);
+    let user0Rewards = await ethers.provider.getBalance(newHolders[0]);
+    let userPastMiddlePointRewards = await ethers.provider.getBalance(newHolders[(newHolders.length / 5) * 3]);
+    let userLastRewards = await ethers.provider.getBalance(newHolders[newHolders.length - 1]);
+    let contrBalance = await ethers.provider.getBalance(rewards.address);
+
+    expect(userOld0Rewards).to.equal(reward / holderAmount);
+    expect(user0Rewards).to.equal(reward / holderAmount);
+    expect(userPastMiddlePointRewards).to.equal(reward / holderAmount);
+    expect(userLastRewards).to.equal(reward / holderAmount);
+    expect(contrBalance).to.equal(0);
+
+    // Start one more batch
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch();
+
+    userOld0Rewards = await ethers.provider.getBalance(initialHolders[0]);
+    user0Rewards = await ethers.provider.getBalance(newHolders[0]);
+    userPastMiddlePointRewards = await ethers.provider.getBalance(newHolders[(newHolders.length / 5) * 3]);
+    userLastRewards = await ethers.provider.getBalance(newHolders[newHolders.length - 1]);
+    contrBalance = await ethers.provider.getBalance(rewards.address);
+
+    expect(userOld0Rewards).to.equal(reward / holderAmount);
+    expect(user0Rewards).to.equal((reward / holderAmount) * 2);
+    expect(userPastMiddlePointRewards).to.equal((reward / holderAmount) * 2);
+    expect(userLastRewards).to.equal((reward / holderAmount) * 2);
+    expect(contrBalance).to.equal(0);
+  });
+
+  it("Dust is reused", async function () {
+    const reward = 10000;
+    await token.transfer(user1.address, tokenSupply / 3, { gasPrice: 0 });
+    await token.transfer(user2.address, tokenSupply / 3, { gasPrice: 0 });
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch({ gasPrice: 0 });
+
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch({ gasPrice: 0 });
+
+    const contrBalBefore = await ethers.provider.getBalance(rewards.address);
+    // This batch uses the dust
+    await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
+    await rewards.processBatch({ gasPrice: 0 });
+
+    const ownerBal = await ethers.provider.getBalance(owner.address);
+    const user1Bal = await ethers.provider.getBalance(user1.address);
+    const user2Bal = await ethers.provider.getBalance(user2.address);
+    const contrBal = await ethers.provider.getBalance(rewards.address);
+
+    expect(ownerBal).to.equal(initialBalanceOwner.sub(reward * 3).add(BigNumber.from(reward.toFixed(0))));
+    expect(user1Bal).to.equal(initialBalanceUser1.add(reward.toFixed(0)));
+    expect(user2Bal).to.equal(initialBalanceUser2.add(reward.toFixed(0)));
+
+    expect(contrBalBefore).to.gt(zero);
+    expect(contrBal).to.eq(zero);
   });
 
   it("Try to start a new batch before previous has finished", async function () {
