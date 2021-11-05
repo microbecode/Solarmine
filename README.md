@@ -85,7 +85,7 @@ Let's say there are 10 token holders and you want to distribute 100 rewards in 3
 
 To deploy the contracts, you need to do the following things:
 1. Deploy the token `MyToken`
-1. Deploy the reward contract
+1. Deploy the reward contract. Give the deployed token address and the LP pool address as parameters
 
 There is an example deployment script in *scripts/deploy.js*. If you have Hardhat installed, you can run it (locally) with: `npx hardhat run scripts/deploy.js --network hardhat`.
 If you use the example deployment script, remember the following things:
@@ -97,7 +97,9 @@ So, in reality, you can't deploy everything with just the script, since you need
 
 ## Verifying the contracts
 
-If the contracts need to be verified in some external service it's easiest to first create a flattened file of all of the contracts. This can be done with Hardhat: *npx hardhat flatten > flat.sol.txt* (not using the direct .sol suffix because it would cause conflicting contract names).
+If the contracts need to be verified in some external service it's probably easiest to first create a flattened file of all of the contracts. This can be done with Hardhat: *npx hardhat flatten > flat.sol.txt* (not using the direct .sol suffix because it would cause conflicting contract names).
+
+The problem with the flattener is that the licensing comments are also included, one per each contract file. This is not acceptable for deployment, so you will need to manually remove the licensing lines from the flattened file (all of them except the first one). So remove each line which looks something like this: `// SPDX-License-Identifier: MIT` - except the first one.
 
 ## Unit tests
 
