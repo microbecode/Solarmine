@@ -59,7 +59,7 @@ describe("Batch rewards", function () {
     }
   };
 
-  /* it("Token holders generated correctly", async function () {
+  it("Token holders generated correctly", async function () {
     const holderAmount = 100;
     await giveTokens(holderAmount, tokenSupply);
 
@@ -87,9 +87,9 @@ describe("Batch rewards", function () {
 
   it("Try to run a batch when none is running", async function () {
     await expect(rewards.processBatch({ gasPrice: 0 })).to.be.revertedWith("No batch running");
-  }); */
+  });
 
-  /* it("Single holder, gets all rewards", async function () {
+  it("Single holder, gets all rewards", async function () {
     const reward = 10000;
     await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
     await rewards.processBatch({ gasPrice: 0 });
@@ -369,7 +369,12 @@ describe("Batch rewards", function () {
     const ownerBalance = await ethers.provider.getBalance(owner.address);
 
     expect(ownerBalance).to.equal(initialBalanceOwner);
-  }); */
+  });
+
+  it("Duplicate check works", async function () {
+    const values = [1, 5, 7, 4, 333433, 7, 0];
+    expect(values.length).to.gt(noDuplicates(values).length);
+  });
 
   it("Initiate with lots of participants", async function () {
     const holderAmount = 10000;

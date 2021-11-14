@@ -30,7 +30,7 @@ describe("Token", function () {
     await token.deployed();
   });
 
-  /* it("Initial data", async function () {
+  it("Initial data", async function () {
     const holders = await token.getHolders();
     expect(holders.length).to.equal(1);
   });
@@ -159,7 +159,7 @@ describe("Token", function () {
     holders = await token.getHolders();
     // no tokens lost on the way
     expect((await token.balanceOf(holders[0])).add(await token.balanceOf(holders[1]))).to.equal(tokenSupply);
-  }); */
+  });
 
   it("Paged holder list, size 1", async function () {
     await token.transfer(user1.address, tokenSupply / 3);
@@ -269,13 +269,4 @@ describe("Token", function () {
     expect(allHolders.length).to.equal(5);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
   });
-
-  /*   it("dd", async function () {
-    await token.transfer(user1.address, tokenSupply / 3);
-    await token.transfer(user2.address, tokenSupply / 3);
-    await token.transfer(user3.address, tokenSupply / 3);
-
-    const lastHolders = await token.getPagedHolders(2, 2);
-    expect(lastHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
-  }); */
 });
