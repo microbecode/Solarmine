@@ -2,7 +2,7 @@
 
 import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
-//import "hardhat-gas-reporter";
+import "hardhat-gas-reporter";
 //require('solidity-coverage')
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -25,6 +25,7 @@ module.exports = {
   solidity: "0.8.0",
   networks: {
     hardhat: {
+      blockGasLimit: 80000000,
       initialBaseFeePerGas: 0, // workaround from https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136 . Remove when that issue is closed.
     },
     /*     ropsten: {
@@ -32,6 +33,9 @@ module.exports = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     }, */
+  },
+  mocha: {
+    timeout: 200000,
   },
   /*   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

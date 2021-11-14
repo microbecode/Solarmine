@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./IMyToken.sol";
 
-contract MyToken is ERC20 {
+contract MyToken is ERC20, IMyToken {
     address[] internal _tokenHolders;
     mapping(address => bool) internal _tokenHolderExists;
     mapping(address => uint256) internal _tokenHolderArrayIndex;
@@ -70,14 +71,41 @@ contract MyToken is ERC20 {
         }
     }
 
-    function getHolders() public view returns (address[] memory) {
+    /**
+     * @dev Get all token holders. Doesn't scale well
+     */
+    function getHolders() public view override returns (address[] memory) {
         return _tokenHolders;
+    }
+
+    /**
+     * @dev Get all token holders, per page
+     * @param itemsToGet How many holders to return
+     * @param offset How many holders to skip in the list before starting list gathering
+     */
+    function getPagedHolders(uint256 itemsToGet, uint256 offset)
+        public
+        view
+        override
+        returns (address[] memory)
+    {
+        uint256 total = _tokenHolders.length;
+        require(total > offset, "Invalid offset");
+
+        uint256 len = itemsToGet + offset > total ? total - offset : itemsToGet;
+        address[] memory result = new address[](len);
+
+        for (uint256 i = 0; i < itemsToGet && i + offset < total; i++) {
+            result[i] = _tokenHolders[i + offset];
+        }
+
+        return result;
     }
 
     /**
      * @dev To make the token fully BEP-20 compatible. No real usage
      */
-    function getOwner() external view returns (address) {
+    function getOwner() external view override returns (address) {
         return _bep20deployer;
     }
 }

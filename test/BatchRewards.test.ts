@@ -35,7 +35,7 @@ describe("Batch rewards", function () {
     token = await tokenFact.deploy(tokenSupply, { gasPrice: 0 });
     await token.deployed();
 
-    const rewardsFact = await ethers.getContractFactory("Rewards");
+    const rewardsFact = await ethers.getContractFactory("RewardsMock");
     rewards = await rewardsFact.deploy(token.address, blacklisted.address, { gasPrice: 0 });
     await rewards.deployed();
 
@@ -59,7 +59,7 @@ describe("Batch rewards", function () {
     }
   };
 
-  it("Token holders generated correctly", async function () {
+  /* it("Token holders generated correctly", async function () {
     const holderAmount = 100;
     await giveTokens(holderAmount, tokenSupply);
 
@@ -87,9 +87,9 @@ describe("Batch rewards", function () {
 
   it("Try to run a batch when none is running", async function () {
     await expect(rewards.processBatch({ gasPrice: 0 })).to.be.revertedWith("No batch running");
-  });
+  }); */
 
-  it("Single holder, gets all rewards", async function () {
+  /* it("Single holder, gets all rewards", async function () {
     const reward = 10000;
     await rewards.initiateBatch(100, { value: reward, gasPrice: 0 });
     await rewards.processBatch({ gasPrice: 0 });
@@ -369,5 +369,34 @@ describe("Batch rewards", function () {
     const ownerBalance = await ethers.provider.getBalance(owner.address);
 
     expect(ownerBalance).to.equal(initialBalanceOwner);
+  }); */
+
+  it("Initiate with lots of participants", async function () {
+    const holderAmount = 10000;
+    await giveTokens(holderAmount, tokenSupply);
+    /*  for (let i = 0; i < 10; i++) {
+      await rewards.updateHolders(105);
+    } */
+    const batchsize = 1001;
+    let offsetMultiplier = 0;
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+    await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
+
+    const holders = await rewards.getBatchHolders();
+    expect(holders.length).to.equal(holderAmount);
+    expect(noDuplicates(holders).length).to.equal(holders.length);
   });
+
+  const noDuplicates = (arr: any[]) => {
+    let uniqueItems = [...new Set(arr)];
+    return uniqueItems;
+  };
 });

@@ -25,6 +25,17 @@ contract Rewards is Ownable {
         _blacklisted = blacklistAddress;
     }
 
+    // TODO: work in progress. really: not working currently
+    function updateHolders(uint256 batchSize, uint256 offset) public {
+        address[] memory pagedHolders = _underlying.getPagedHolders(
+            batchSize,
+            offset
+        );
+        for (uint256 i; i < pagedHolders.length; i++) {
+            _batchHolders.push(pagedHolders[i]);
+        }
+    }
+
     /**
     @dev Initiates a new batch run: stores a snapshot of the current token data
     */

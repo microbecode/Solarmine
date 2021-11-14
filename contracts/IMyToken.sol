@@ -6,5 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface IMyToken is IERC20 {
     function getHolders() external returns (address[] memory);
 
+    function getPagedHolders(uint256, uint256)
+        external
+        view
+        returns (address[] memory);
+
     function getOwner() external view returns (address);
 }
