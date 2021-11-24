@@ -1,5 +1,5 @@
 import { ethers, network, waffle } from "hardhat";
-import { BigNumber, Contract, Signer } from "ethers";
+import { BigNumber, Contract, ContractReceipt, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
 require("@nomiclabs/hardhat-waffle");
@@ -15,6 +15,8 @@ describe("Token", function () {
   let user4: SignerWithAddress;
   let user5: SignerWithAddress;
   const tokenSupply = 1200;
+  const addedEvent = "HolderAdded";
+  const removedEvent = "HolderRemoved";
 
   beforeEach(async function () {
     accounts = await ethers.getSigners();
@@ -41,10 +43,11 @@ describe("Token", function () {
 
     expect(holders.length).to.equal(2);
 
-    await token.transfer(user2.address, 1);
+    const receipt = await (await token.transfer(user2.address, 1)).wait();
     holders = await token.getHolders();
 
     expect(holders.length).to.equal(3);
+    expectEvent(receipt, addedEvent, user2.address);
   });
 
   it("No double adding", async function () {
@@ -57,11 +60,12 @@ describe("Token", function () {
 
   it("Remove a user", async function () {
     await token.transfer(user1.address, 1);
-    await token.connect(user1).transfer(owner.address, 1);
+    const receipt = await (await token.connect(user1).transfer(owner.address, 1)).wait();
     let holders = await token.getHolders();
 
     expect(holders.length).to.equal(1);
     expect(holders[0]).to.equal(owner.address);
+    expectEvent(receipt, removedEvent, user1.address);
   });
 
   it("Transfer to self keeps you on the list", async function () {
@@ -84,8 +88,9 @@ describe("Token", function () {
     await token.transfer(user1.address, 3);
     await token.connect(user1).transfer(owner.address, 3);
     expect((await token.getHolders()).length).to.equal(1);
-    await token.transfer(user1.address, 5);
+    const receipt = await (await token.transfer(user1.address, 5)).wait();
     expect((await token.getHolders()).length).to.equal(2);
+    expectEvent(receipt, addedEvent, user1.address);
   });
 
   it("Many transfers, you're out when you reach zero", async function () {
@@ -269,4 +274,16 @@ describe("Token", function () {
     expect(allHolders.length).to.equal(5);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
   });
+
+  const expectEvent = (receipt: ContractReceipt, name: string, addr: string) => {
+    const event = receipt.events?.filter((x: any) => {
+      return x.event == name;
+    });
+    if (event && event.length > 0 && event[0].args && event[0].args.length > 0) {
+      expect(event.length).to.gt(0);
+      expect(event[0].args[0]).to.equal(addr);
+    } else {
+      expect.fail();
+    }
+  };
 });

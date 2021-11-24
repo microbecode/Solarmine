@@ -11,8 +11,8 @@ contract MyToken is ERC20, IMyToken {
     EnumerableSet.AddressSet internal _tokenHolders;
     address private _bep20deployer;
 
-    event HolderAdded(address indexed);
-    event HolderRemoved(address indexed);
+    event HolderAdded(address indexed holder);
+    event HolderRemoved(address indexed holder);
 
     constructor(
         uint256 initialBalance,
@@ -47,6 +47,7 @@ contract MyToken is ERC20, IMyToken {
         if (_tokenHolders.add(tokenHolder)) {
             emit HolderAdded(tokenHolder);
         }
+        emit HolderAdded(tokenHolder);
     }
 
     /**

@@ -376,12 +376,10 @@ describe("Batch rewards", function () {
     expect(values.length).to.gt(noDuplicates(values).length);
   });
 
-  it("Initiate with lots of participants", async function () {
+  /*   it("Initiate with lots of participants", async function () {
     const holderAmount = 10000;
     await giveTokens(holderAmount, tokenSupply);
-    /*  for (let i = 0; i < 10; i++) {
-      await rewards.updateHolders(105);
-    } */
+
     const batchsize = 1001;
     let offsetMultiplier = 0;
     await rewards.updateHolders(batchsize, offsetMultiplier++ * batchsize);
@@ -398,7 +396,7 @@ describe("Batch rewards", function () {
     const holders = await rewards.getBatchHolders();
     expect(holders.length).to.equal(holderAmount);
     expect(noDuplicates(holders).length).to.equal(holders.length);
-  });
+  }); */
 
   const noDuplicates = (arr: any[]) => {
     let uniqueItems = [...new Set(arr)];
