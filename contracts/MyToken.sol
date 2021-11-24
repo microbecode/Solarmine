@@ -11,6 +11,9 @@ contract MyToken is ERC20, IMyToken {
     EnumerableSet.AddressSet internal _tokenHolders;
     address private _bep20deployer;
 
+    event HolderAdded(address indexed);
+    event HolderRemoved(address indexed);
+
     constructor(
         uint256 initialBalance,
         string memory name,
@@ -39,17 +42,20 @@ contract MyToken is ERC20, IMyToken {
 
     /**
      * @dev Add a token holder to the array (if not yet exists). Fully scalable
-     * Inspired by https://ethereum.stackexchange.com/a/12707/31933
      */
     function _addTokenHolder(address tokenHolder) internal {
-        _tokenHolders.add(tokenHolder);
+        if (_tokenHolders.add(tokenHolder)) {
+            emit HolderAdded(tokenHolder);
+        }
     }
 
     /**
-     * @dev Remove a token holder from the array. Fully scalable
+     * @dev Remove a token holder from the array (if exists). Fully scalable
      */
     function _removeTokenHolder(address tokenHolder) internal {
-        _tokenHolders.remove(tokenHolder);
+        if (_tokenHolders.remove(tokenHolder)) {
+            emit HolderRemoved(tokenHolder);
+        }
     }
 
     /**
