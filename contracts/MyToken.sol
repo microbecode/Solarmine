@@ -67,6 +67,13 @@ contract MyToken is ERC20, IMyToken {
     }
 
     /**
+     * @dev Get holder amount
+     */
+    function getHolderAmount() public view override returns (uint256) {
+        return _tokenHolders.length();
+    }
+
+    /**
      * @dev Get all token holders, per page
      * @param itemsToGet How many holders to return
      * @param offset How many holders to skip in the list before starting list gathering

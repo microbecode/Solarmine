@@ -17,6 +17,7 @@ describe("Token", function () {
   const tokenSupply = 1200;
   const addedEvent = "HolderAdded";
   const removedEvent = "HolderRemoved";
+  let currentCreatedAddressNumber: number = 0; // so that each test creates their own addresses
 
   beforeEach(async function () {
     accounts = await ethers.getSigners();
@@ -27,8 +28,8 @@ describe("Token", function () {
     user4 = accounts[4];
     user5 = accounts[5];
 
-    const tokenFact = await ethers.getContractFactory("MyToken");
-    token = await tokenFact.deploy(tokenSupply, "", "");
+    const tokenFact = await ethers.getContractFactory("MyTokenMock");
+    token = await tokenFact.deploy(tokenSupply);
     await token.deployed();
   });
 
@@ -74,6 +75,7 @@ describe("Token", function () {
     let holders = await token.getHolders();
 
     expect(holders.length).to.equal(2);
+    expect(noDuplicates(holders).length).to.equal(holders.length);
   });
 
   it("Transferring only part keeps you on the list", async function () {
@@ -82,6 +84,7 @@ describe("Token", function () {
     let holders = await token.getHolders();
 
     expect(holders.length).to.equal(2);
+    expect(noDuplicates(holders).length).to.equal(holders.length);
   });
 
   it("You can get readded", async function () {
@@ -112,6 +115,7 @@ describe("Token", function () {
     let holders = await token.getHolders();
 
     expect(holders.length).to.equal(2);
+    expect(noDuplicates(holders).length).to.equal(holders.length);
   });
 
   it("Also transferFrom works, with sending back", async function () {
@@ -164,6 +168,7 @@ describe("Token", function () {
     holders = await token.getHolders();
     // no tokens lost on the way
     expect((await token.balanceOf(holders[0])).add(await token.balanceOf(holders[1]))).to.equal(tokenSupply);
+    expect(noDuplicates(holders).length).to.equal(holders.length);
   });
 
   it("Paged holder list, size 1", async function () {
@@ -181,6 +186,7 @@ describe("Token", function () {
     expect(allHolders.indexOf(user2.address)).to.gt(-1);
     expect(allHolders.indexOf(user3.address)).to.gt(-1);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
   });
 
   it("Paged holder list, size 2", async function () {
@@ -202,6 +208,7 @@ describe("Token", function () {
     expect(allHolders.indexOf(user4.address)).to.gt(-1);
     expect(allHolders.indexOf(user5.address)).to.gt(-1);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
   });
 
   it("Paged holder list, size 3, odd holder list size", async function () {
@@ -222,6 +229,7 @@ describe("Token", function () {
     expect(allHolders.indexOf(user4.address)).to.gt(-1);
     expect(allHolders.indexOf(user5.address)).to.gt(-1);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
   });
 
   it("Paged holder list, size 3, even holder list size", async function () {
@@ -243,6 +251,7 @@ describe("Token", function () {
     expect(allHolders.indexOf(user5.address)).to.gt(-1);
     expect(allHolders.indexOf(owner.address)).to.gt(-1);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
   });
 
   it("Too big offset reverts", async function () {
@@ -273,6 +282,26 @@ describe("Token", function () {
     const allHolders = await token.getPagedHolders(20, 0);
     expect(allHolders.length).to.equal(5);
     expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
+  });
+
+  it("Generating lots of holders works", async function () {
+    await giveTokens(15, 1500);
+
+    const holderAmount = await token.getHolderAmount();
+    expect(holderAmount).to.equal(15 + 1);
+  });
+
+  it("Paged holders for bigger user amounts", async function () {
+    await giveTokens(9, 9000);
+    let allHolders: any[] = [];
+    allHolders = allHolders.concat(await token.getPagedHolders(4, 0));
+    allHolders = allHolders.concat(await token.getPagedHolders(2, 4));
+    allHolders = allHolders.concat(await token.getPagedHolders(555, 6));
+
+    expect(allHolders.length).to.equal(9 + 1);
+    expect(allHolders.indexOf(ethers.constants.AddressZero)).to.equal(-1);
+    expect(noDuplicates(allHolders).length).to.equal(allHolders.length);
   });
 
   const expectEvent = (receipt: ContractReceipt, name: string, addr: string) => {
@@ -285,5 +314,19 @@ describe("Token", function () {
     } else {
       expect.fail();
     }
+  };
+
+  // Generate addresses and send them tokens
+  const giveTokens = async (holders: number, totalAmount: number) => {
+    let prefixNum = ethers.BigNumber.from("10").pow(38);
+    for (let i = 0; i < holders; i++) {
+      const addr = "0x5" + prefixNum.add(currentCreatedAddressNumber++).toString();
+      await token.mint(addr, totalAmount / holders, { gasPrice: 0 });
+    }
+  };
+
+  const noDuplicates = (arr: any[]) => {
+    let uniqueItems = [...new Set(arr)];
+    return uniqueItems;
   };
 });
