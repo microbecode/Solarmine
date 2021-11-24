@@ -2,12 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./IMyToken.sol";
 
 contract MyToken is ERC20, IMyToken {
-    address[] internal _tokenHolders;
-    mapping(address => bool) internal _tokenHolderExists;
-    mapping(address => uint256) internal _tokenHolderArrayIndex;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    EnumerableSet.AddressSet internal _tokenHolders;
     address private _bep20deployer;
 
     constructor(
@@ -41,41 +42,21 @@ contract MyToken is ERC20, IMyToken {
      * Inspired by https://ethereum.stackexchange.com/a/12707/31933
      */
     function _addTokenHolder(address tokenHolder) internal {
-        if (!_tokenHolderExists[tokenHolder]) {
-            // doesn't exist
-            _tokenHolders.push(tokenHolder);
-            _tokenHolderExists[tokenHolder] = true;
-            _tokenHolderArrayIndex[tokenHolder] = _tokenHolders.length - 1;
-        }
+        _tokenHolders.add(tokenHolder);
     }
 
     /**
      * @dev Remove a token holder from the array. Fully scalable
      */
     function _removeTokenHolder(address tokenHolder) internal {
-        if (_tokenHolderExists[tokenHolder]) {
-            address lastHolder = _tokenHolders[_tokenHolders.length - 1];
-            // Move the last entry to replace this entry
-            _tokenHolders[_tokenHolderArrayIndex[tokenHolder]] = lastHolder;
-            _tokenHolders.pop(); // remove last entry
-
-            // Update index for the moved holder
-            _tokenHolderArrayIndex[lastHolder] = _tokenHolderArrayIndex[
-                tokenHolder
-            ];
-
-            // Remove index
-            delete _tokenHolderArrayIndex[tokenHolder];
-            // Mark as non-existing
-            _tokenHolderExists[tokenHolder] = false;
-        }
+        _tokenHolders.remove(tokenHolder);
     }
 
     /**
      * @dev Get all token holders. Doesn't scale well
      */
     function getHolders() public view override returns (address[] memory) {
-        return _tokenHolders;
+        return _tokenHolders.values();
     }
 
     /**
@@ -89,14 +70,14 @@ contract MyToken is ERC20, IMyToken {
         override
         returns (address[] memory)
     {
-        uint256 total = _tokenHolders.length;
+        uint256 total = _tokenHolders.length();
         require(total > offset, "Invalid offset");
 
         uint256 len = itemsToGet + offset > total ? total - offset : itemsToGet;
         address[] memory result = new address[](len);
 
         for (uint256 i = 0; i < itemsToGet && i + offset < total; i++) {
-            result[i] = _tokenHolders[i + offset];
+            result[i] = _tokenHolders.at(i + offset);
         }
 
         return result;
