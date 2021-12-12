@@ -16,7 +16,6 @@
     "ethers": "^5.0.31",
     "evm-chains": "^0.2.0",
     "jsoncrush": "^1.1.6",
-    "node-sass": "^5.0.0",
     "normalize-scss": "^7.0.1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.1",
@@ -55,6 +54,7 @@
   },
   "devDependencies": {
     "@types/react-router-dom": "^5.1.7",
-    "@types/react-router-hash-link": "^1.2.1"
+    "@types/react-router-hash-link": "^1.2.1",
+    "sass": "^1.45.0"
   }
 }
