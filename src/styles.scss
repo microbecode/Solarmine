@@ -1,0 +1,337 @@
+@import "node_modules/normalize-scss/sass/normalize";
+
+@include normalize();
+
+@font-face {
+  font-family: "Impact";
+  src: local("Impact"), url(./fonts/impact.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Futura";
+  src: local("Futura"), url(./fonts/futura.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Avenir";
+  src: local("Avenir"), url(./fonts/avenir.otf) format("opentype");
+}
+
+$dark-color: #121212;
+$light-color: white;
+
+body {
+  color: $dark-color;
+  background: $light-color;
+
+  .container-fluid {
+    padding: 0;
+  }
+
+  .theme-container {
+    background: #f5f5f5;
+  }
+
+  .theme-card {
+    background-color: #e8e8e8;
+  }
+
+  .form-group > input {
+    background: white;
+  }
+
+  .create-container .form-group > input {
+    background: #f0f0f0;
+  }
+
+  .feature-container {
+    background: white;
+  }
+
+  .social-img {
+    -webkit-filter: brightness(0);
+    -moz-filter: brightness(0);
+    -ms-filter: brightness(0);
+    -o-filter: brightness(0);
+    filter: brightness(0);
+  }
+
+  a {
+    color: #171717;
+
+    &:hover {
+      color: #09d1b7;
+    }
+  }
+
+  .img-container {
+    background: #d8d8d8;
+    background: linear-gradient(#d8d8d8 0%, #f0f0f0 100%);
+    background: -webkit-linear-gradient(#d8d8d8 0%, #f0f0f0 100%);
+  }
+
+  .header-container {
+    background: white;
+    border-bottom: 1px solid #d6d6d6;
+  }
+
+  .theme-button-container {
+    background: #f5f5f5;
+  }
+
+  .navbar-light .navbar-nav .nav-link:hover,
+  .navbar-light .navbar-nav .nav-link.active {
+    color: #171717;
+  }
+
+  .card-header {
+    background: white;
+
+    &::after {
+      border: solid #171717;
+      border-width: 0 3px 3px 0;
+    }
+  }
+
+  .faq-container {
+    .card {
+      border: 0 !important;
+      border-bottom: 1px solid rgba(23, 23, 23, 0.1) !important;
+    }
+  }
+
+  .btn.btn-link {
+    color: #171717;
+  }
+
+  .modal-content {
+    background: white;
+    color: #171717;
+    border-radius: 20px;
+    border: 3px solid #63d109;
+
+    .close span {
+      color: #171717;
+    }
+  }
+
+  .create-container {
+    .upload-img {
+      background-color: #f0f0f0;
+    }
+
+    .upload-label {
+      color: #7e7e7e;
+    }
+  }
+
+  .form-control {
+    color: #333333;
+    border-radius: 20px;
+    border: 0;
+    padding: 35px;
+
+    &:focus {
+      color: inherit;
+    }
+  }
+
+  &.dark-theme {
+    background: $dark-color;
+    color: $light-color;
+
+    .theme-container {
+      background: #1a1a1a;
+    }
+
+    .theme-card {
+      background-color: #343434;
+    }
+
+    .form-group > input {
+      background: #333333;
+    }
+
+    .create-container .form-group > input {
+      background: #333333;
+    }
+
+    .feature-container {
+      background: #343434;
+    }
+
+    .social-img {
+      -webkit-filter: brightness(0) invert(1);
+      -moz-filter: brightness(0) invert(1);
+      -ms-filter: brightness(0) invert(1);
+      -o-filter: brightness(0) invert(1);
+      filter: brightness(0) invert(1);
+    }
+
+    a {
+      color: white;
+
+      &:hover {
+        color: #09d1b7;
+      }
+    }
+
+    .img-container {
+      background: #343434;
+      background: linear-gradient(#343434 0%, #1a1a1a 100%);
+      background: -webkit-linear-gradient(#343434 0%, #1a1a1a 100%);
+    }
+
+    .header-container {
+      background: #1a1a1a;
+      border-bottom: 1px solid #393939;
+    }
+
+    .theme-button-container {
+      background: #292929;
+    }
+
+    .navbar-light .navbar-nav .nav-link:hover,
+    .navbar-light .navbar-nav .nav-link.active {
+      color: white;
+    }
+
+    .card-header {
+      background: #121212;
+
+      &::after {
+        border: solid white;
+        border-width: 0 3px 3px 0;
+      }
+    }
+
+    .faq-container {
+      .card {
+        border: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+
+    .btn.btn-link {
+      color: white;
+    }
+
+    .modal-content {
+      background: #121212;
+      color: white;
+
+      .close span {
+        color: black;
+      }
+    }
+
+    .create-container {
+      .upload-img {
+        background-color: #333333;
+      }
+    }
+
+    .form-control {
+      color: white;
+    }
+  }
+
+  font-family: "Futura";
+
+  h1,
+  h2,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Impact";
+  }
+
+  h2 {
+    font-size: 4rem;
+  }
+
+  footer {
+    font-family: "Avenir";
+  }
+}
+
+.card {
+  background: inherit;
+
+  .card-header {
+    cursor: pointer;
+  }
+}
+
+.btn-link,
+.btn-link:hover {
+  color: $dark-color;
+}
+
+.btn:focus,
+.btn:active {
+  outline: none !important;
+  box-shadow: none;
+}
+
+#interact {
+  margin: 10px;
+}
+
+input[type="text"] {
+  width: 500px;
+}
+
+input[type="radio"] {
+  margin: 10px;
+}
+
+label {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+input[type="button"],
+button {
+  margin: 10px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: rgb(159, 191, 226);
+  border: solid 1px transparent;
+  border-radius: 18px;
+}
+
+input[type="text"],
+select {
+  border-radius: 5px;
+  border-width: 1px;
+  padding: 5px;
+}
+
+fieldset {
+  /*  border-style: dotted;
+  border-width: 1px;
+   */
+  border-radius: 5px;
+  border: 1px solid;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+legend {
+  width: 0%;
+}
+
+.myRadio {
+  padding: 10px;
+}
+
+select {
+  margin-right: 10px;
+}
+.functions {
+  padding-left: 10px;
+}
