@@ -16,6 +16,7 @@
     "ethers": "^5.0.31",
     "evm-chains": "^0.2.0",
     "jsoncrush": "^1.1.6",
+    "netlify-cli": "^8.1.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.1",
     "react-chartjs-2": "^2.11.1",
