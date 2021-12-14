@@ -10,25 +10,39 @@ const handler: Handler = async (event, context) => {
   const ABI = [
     {
       constant: false,
-      inputs: [],
-      name: "deposit",
-      outputs: [],
-      payable: true,
-      stateMutability: "payable",
+      inputs: [
+        {
+          name: "_spender",
+          type: "address",
+        },
+        {
+          name: "_value",
+          type: "uint256",
+        },
+      ],
+      name: "approve",
+      outputs: [
+        {
+          name: "",
+          type: "bool",
+        },
+      ],
+      payable: false,
+      stateMutability: "nonpayable",
       type: "function",
     },
   ];
+  const contrAddress = "0x84b9b910527ad5c03a9ca831909e21e236ea7b06";
   const signer = new ethers.Wallet(process.env.TESTNET_PRIVATE_KEY, provider);
-  const contract = new ethers.Contract(
-    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-    ABI,
-    signer
-  );
+  const contract = new ethers.Contract(contrAddress, ABI, signer);
 
-  const res = await contract.deposit({
-    value: BigNumber.from(50),
-    gasLimit: ethers.utils.parseUnits("1.0", 6),
-  });
+  const res = await contract.approve(
+    "0x84b9b910527ad5c03a9ca831909e21e236ea7b07",
+    ethers.utils.parseUnits("2.0", 3),
+    {
+      gasLimit: ethers.utils.parseUnits("1.0", 7),
+    }
+  );
   const rec = await res.wait();
   console.log("resulttt", res, rec);
 
