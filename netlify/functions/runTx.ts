@@ -1,6 +1,5 @@
 import { Handler } from "@netlify/functions";
 import ethers, { BigNumber } from "ethers";
-//import Moralis from "moralis/node";
 
 const handler: Handler = async (event, context) => {
   const provider = new ethers.providers.JsonRpcProvider(
