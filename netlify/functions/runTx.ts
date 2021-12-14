@@ -1,27 +1,41 @@
 import { Handler } from "@netlify/functions";
-import Moralis from "moralis/node";
+import ethers, { BigNumber } from "ethers";
+//import Moralis from "moralis/node";
 
 const handler: Handler = async (event, context) => {
-  const serverUrl = process.env.TESTNET_SERVER;
-  const appId = process.env.TESTNET_APP_ID;
-  Moralis.start({ serverUrl, appId });
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.TESTNET_PROVIDER_URL
+  );
 
-  const options = {
-    chain: "bsc testnet",
-    address: "0xF58014d71Dbc231495a6e3BfC2A9289c55b4eE4a",
-  };
+  const ABI = [
+    {
+      constant: false,
+      inputs: [],
+      name: "deposit",
+      outputs: [],
+      payable: true,
+      stateMutability: "payable",
+      type: "function",
+    },
+  ];
+  const signer = new ethers.Wallet(process.env.TESTNET_PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(
+    "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    ABI,
+    signer
+  );
 
-  //const query = new Moralis.Query("EthTransactions");
-  const balance = await Moralis.Web3API.account.getNativeBalance(options);
-  console.log("bal", balance);
-  /* 
-
-  const results = await query.find(); */
+  const res = await contract.deposit({
+    value: BigNumber.from(50),
+    gasLimit: ethers.utils.parseUnits("1.0", 6),
+  });
+  const rec = await res.wait();
+  console.log("resulttt", res, rec);
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: "Hello World" + balance + " a " + balance.balance,
+      message: "Hello World",
     }),
   };
 };
