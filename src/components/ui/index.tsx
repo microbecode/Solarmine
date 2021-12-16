@@ -1,3 +1,4 @@
+import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
@@ -35,6 +36,12 @@ const usedEnv =
 
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
+
+export interface SendParams {
+  tokenAddress: string;
+  blacklist: string[];
+  amount: string;
+}
 
 export function UI(props: Props) {
   const [usedChainName, setUsedChainName] = useState<string>("");
@@ -85,7 +92,7 @@ export function UI(props: Props) {
     }
   }, []);
 
-  const confirmSend = () => {
+  const confirmSend = async () => {
     if (
       isMyNumeric(assetAmount) &&
       window.confirm(
@@ -93,6 +100,13 @@ export function UI(props: Props) {
       )
     ) {
       console.log("yes");
+      const data: SendParams = {
+        tokenAddress: usedToken,
+        amount: assetAmount,
+        blacklist: usedBlacklist,
+      };
+      const res = await axios.post("/.netlify/functions/runTx", data);
+      console.log("send result", res);
     } else {
       alert("Fix your amount");
     }
