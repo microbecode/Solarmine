@@ -1,27 +1,27 @@
 import { Handler } from "@netlify/functions";
 import ethers, { BigNumber } from "ethers";
 
+enum Env {
+  Local,
+  Test,
+  Production,
+}
+
 interface SendParams {
   tokenAddress: string;
   blacklist: string[];
   amount: string;
+  env: string;
 }
 
 const handler: Handler = async (event, context) => {
-  //console.log("event", event);
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: "POST is required",
-      }),
-    };
-  }
   const params = JSON.parse(event.body) as SendParams;
+  //console.log("got params", params);
   if (
     !params ||
     params.amount?.length === 0 ||
-    params.tokenAddress?.length === 0
+    params.tokenAddress?.length === 0 ||
+    !!Env[params.env]
   ) {
     return {
       statusCode: 500,
@@ -30,8 +30,6 @@ const handler: Handler = async (event, context) => {
       }),
     };
   }
-
-  console.log("got params", params);
 
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.TESTNET_PROVIDER_URL

@@ -37,10 +37,11 @@ const usedEnv =
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
 
-export interface SendParams {
+interface SendParams {
   tokenAddress: string;
   blacklist: string[];
   amount: string;
+  env: string;
 }
 
 export function UI(props: Props) {
@@ -60,6 +61,9 @@ export function UI(props: Props) {
     }
     return false;
   }
+
+  const e = "Test";
+  console.log("is", !!Env[e]);
 
   /*   useEffect(() => {
     try {
@@ -104,6 +108,7 @@ export function UI(props: Props) {
         tokenAddress: usedToken,
         amount: assetAmount,
         blacklist: usedBlacklist,
+        env: usedEnv,
       };
       const res = await axios.post("/.netlify/functions/runTx", data);
       console.log("send result", res);
