@@ -123,7 +123,7 @@ export function Dapp() {
               window.ethereum === undefined ? <NoWalletDetected /> : null
             }
 
-            <UI></UI>
+            <UI walletAddress={selectedAddress}></UI>
 
             <Footer />
           </Container>

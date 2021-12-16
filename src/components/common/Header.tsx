@@ -39,16 +39,7 @@ export function Header({ connectWallet, selectedAddress }: Props) {
                 <Nav className="mr-auto py-0"></Nav>
                 {window.ethereum !== undefined ? (
                   selectedAddress ? (
-                    <Button
-                      variant="primary-outline"
-                      className="d-blockmt-3 my-xl-0 mx-4"
-                      title="Copy to clipboard"
-                      onClick={() => {
-                        navigator.clipboard.writeText(selectedAddress);
-                      }}
-                    >
-                      {selectedAddress.substring(0, 10) + "..."}
-                    </Button>
+                    ""
                   ) : (
                     <Button
                       className="d-block filled arrow mt-3 my-xl-0 mx-4"
