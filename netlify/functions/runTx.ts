@@ -8,9 +8,8 @@ enum Env {
 }
 
 interface SendParams {
-  tokenAddress: string;
-  blacklist: string[];
-  amount: string;
+  addresses: string[];
+  amounts: number[];
   env: string;
 }
 
@@ -19,8 +18,10 @@ const handler: Handler = async (event, context) => {
   //console.log("got params", params);
   if (
     !params ||
-    params.amount?.length === 0 ||
-    params.tokenAddress?.length === 0 ||
+    !params.addresses ||
+    !params.amounts ||
+    params.addresses.length === 0 ||
+    params.amounts.length !== params.addresses.length ||
     !!Env[params.env]
   ) {
     return {

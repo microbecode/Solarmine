@@ -2,6 +2,7 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
+import { calcDistribution } from "../calcs";
 
 const isTest = true;
 
@@ -36,13 +37,6 @@ const usedEnv =
 
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
-
-interface SendParams {
-  tokenAddress: string;
-  blacklist: string[];
-  amount: string;
-  env: string;
-}
 
 export function UI(props: Props) {
   const [usedChainName, setUsedChainName] = useState<string>("");
@@ -104,14 +98,23 @@ export function UI(props: Props) {
       )
     ) {
       console.log("yes");
-      const data: SendParams = {
+      let num = +assetAmount;
+      num = num * 100000;
+      var big = BigNumber.from(num.toString());
+
+      const data = calcDistribution(usedToken, big, usedEnv);
+      data.forEach(async (element) => {
+        const res = await axios.post("/.netlify/functions/runTx", element);
+        console.log("send result", res);
+      });
+      /* const data: SendParams = {
         tokenAddress: usedToken,
         amount: assetAmount,
         blacklist: usedBlacklist,
         env: usedEnv,
       };
       const res = await axios.post("/.netlify/functions/runTx", data);
-      console.log("send result", res);
+      console.log("send result", res); */
     } else {
       alert("Fix your amount");
     }
