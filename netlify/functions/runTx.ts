@@ -7,15 +7,27 @@ enum Env {
   Production,
 }
 
-interface SendParams {
+export interface SendParams {
   addresses: string[];
   amounts: number[];
   env: string;
 }
 
+interface SignedParams {
+  signedMsg: string;
+  originalMsg: SendParams;
+}
+
 const handler: Handler = async (event, context) => {
-  const params = JSON.parse(event.body) as SendParams;
-  //console.log("got params", params);
+  console.log("got params", event.body);
+  const signedParams = JSON.parse(event.body) as SignedParams;
+  const params = signedParams.originalMsg;
+
+  const ress = await ethers.utils.verifyMessage(
+    JSON.stringify(signedParams.originalMsg),
+    signedParams.signedMsg
+  );
+  console.log("verify result", ress);
   if (
     !params ||
     !params.addresses ||

@@ -3,6 +3,12 @@ export interface SendParams {
   amounts: number[];
   env: string;
 }
+
+export interface SignedParams {
+  signedMsg: string;
+  originalMsg: SendParams;
+}
+
 export enum Env {
   Local,
   Test,

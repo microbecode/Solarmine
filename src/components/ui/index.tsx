@@ -3,6 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcDistribution } from "../calcs";
+import { SignedParams } from "../types";
 
 const isTest = true;
 
@@ -91,6 +92,8 @@ export function UI(props: Props) {
   }, []);
 
   const confirmSend = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
     if (
       isMyNumeric(assetAmount) &&
       window.confirm(
@@ -103,9 +106,17 @@ export function UI(props: Props) {
       var big = BigNumber.from(num.toString());
 
       const data = calcDistribution(usedToken, big, usedEnv);
-      data.forEach(async (element) => {
-        const res = await axios.post("/.netlify/functions/runTx", element);
-        console.log("send result", res);
+      data.forEach(async (sendItem) => {
+        const signed = await provider
+          .getSigner()
+          .signMessage(JSON.stringify(sendItem));
+        const sendData: SignedParams = {
+          originalMsg: sendItem,
+          signedMsg: signed,
+        };
+        const toSend = JSON.stringify(sendData);
+        const res = await axios.post("/.netlify/functions/runTx", toSend);
+        console.log("send result", res, toSend);
       });
       /* const data: SendParams = {
         tokenAddress: usedToken,
