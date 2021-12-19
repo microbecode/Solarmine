@@ -92,6 +92,9 @@ const handler: Handler = async (event, context) => {
     body: JSON.stringify({
       message: "Hello World",
     }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   };
 };
 

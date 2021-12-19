@@ -115,6 +115,16 @@ export function UI(props: Props) {
           signedMsg: signed,
         };
         const toSend = JSON.stringify(sendData);
+
+        axios({
+          method: "post",
+          url: "/.netlify/functions/runTx",
+          data: toSend,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
         const res = await axios.post("/.netlify/functions/runTx", toSend);
         console.log("send result", res, toSend);
       });
