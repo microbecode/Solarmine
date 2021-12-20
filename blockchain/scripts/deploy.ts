@@ -1,4 +1,5 @@
-const hre = require("hardhat");
+import { artifacts, ethers } from "hardhat";
+import * as fs from "fs";
 
 async function main() {
   const tokenSupply = ethers.utils.parseUnits("100", 18);
@@ -13,6 +14,31 @@ async function main() {
   await rewards.deployed();
 
   console.log("Token deployed to:", token.address, "rewards at:", rewards.address);
+
+  await saveFrontendFiles(token.address);
+}
+
+async function saveFrontendFiles(tokenAddr: string) {
+  const contractsDir = __dirname + "/../../src/contracts";
+
+  if (!fs.existsSync(contractsDir)) {
+    fs.mkdirSync(contractsDir);
+  }
+
+  fs.writeFileSync(
+    contractsDir + "/contract-address.json",
+    JSON.stringify(
+      {
+        Token: tokenAddr,
+      },
+      undefined,
+      2
+    )
+  );
+
+  const TokenArtifact = artifacts.readArtifactSync("MyTokenMock");
+
+  fs.writeFileSync(contractsDir + "/Token.json", JSON.stringify(TokenArtifact, null, 2));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

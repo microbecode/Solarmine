@@ -2,7 +2,7 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
-import { calcDistribution } from "../calcs";
+import { calcDistribution } from "../../utils/calcs";
 import { SignedParams } from "../types";
 
 const isTest = true;
@@ -18,7 +18,7 @@ enum Env {
 }
 
 const tokenAddresses = {
-  Local: "a",
+  Local: "0xaaabbbacca5a467e9e704c703e8d87f634fb0fc9",
   Test: "b",
   Production: "c",
 };
@@ -105,7 +105,7 @@ export function UI(props: Props) {
       num = num * 100000;
       var big = BigNumber.from(num.toString());
 
-      const data = calcDistribution(usedToken, big, usedEnv);
+      const data = calcDistribution(provider, usedToken, big, usedEnv);
       data.forEach(async (sendItem) => {
         const signed = await provider
           .getSigner()
@@ -116,7 +116,7 @@ export function UI(props: Props) {
         };
         const toSend = JSON.stringify(sendData);
 
-        axios({
+        /*         axios({
           method: "post",
           url: "/.netlify/functions/runTx",
           data: toSend,
@@ -126,16 +126,8 @@ export function UI(props: Props) {
         });
 
         const res = await axios.post("/.netlify/functions/runTx", toSend);
-        console.log("send result", res, toSend);
+        console.log("send result", res, toSend); */
       });
-      /* const data: SendParams = {
-        tokenAddress: usedToken,
-        amount: assetAmount,
-        blacklist: usedBlacklist,
-        env: usedEnv,
-      };
-      const res = await axios.post("/.netlify/functions/runTx", data);
-      console.log("send result", res); */
     } else {
       alert("Fix your amount");
     }

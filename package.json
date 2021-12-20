@@ -29,7 +29,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "blockchain": "cd blockchain && npx hardhat node",
+    "deploy": "cd blockchain && npx hardhat run scripts/deploy.ts --network localhost"
   },
   "eslintConfig": {
     "extends": "react-app",
