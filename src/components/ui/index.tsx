@@ -4,6 +4,7 @@ import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcDistribution } from "../../utils/calcs";
 import { SignedParams } from "../types";
+import contractAddress from "../../contracts/contract-address.json";
 
 const isTest = true;
 
@@ -18,13 +19,13 @@ enum Env {
 }
 
 const tokenAddresses = {
-  Local: "0xaaabbbacca5a467e9e704c703e8d87f634fb0fc9",
+  Local: contractAddress.Token,
   Test: "b",
   Production: "c",
 };
 
 const blacklistedAddresses = {
-  Local: ["aa", "aaa"],
+  Local: [contractAddress.Token],
   Test: ["bb", "bbb"],
   Production: ["cc", "ccc"],
 };
@@ -105,7 +106,7 @@ export function UI(props: Props) {
       num = num * 100000;
       var big = BigNumber.from(num.toString());
 
-      const data = calcDistribution(provider, usedToken, big, usedEnv);
+      const data = await calcDistribution(provider, usedToken, big, usedEnv);
       data.forEach(async (sendItem) => {
         const signed = await provider
           .getSigner()

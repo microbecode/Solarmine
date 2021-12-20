@@ -1,5 +1,14 @@
 import { artifacts, ethers } from "hardhat";
 import * as fs from "fs";
+import { Contract } from "ethers";
+
+const giveTokens = async (token: Contract, holders: number, totalAmount: number) => {
+  let prefixNum = ethers.BigNumber.from("10").pow(38);
+  for (let i = 0; i < holders; i++) {
+    const addr = "0x5" + prefixNum.add(i).toString();
+    await token.transfer(addr, totalAmount / holders, { gasPrice: 0 });
+  }
+};
 
 async function main() {
   const tokenSupply = ethers.utils.parseUnits("100", 18);
@@ -14,6 +23,8 @@ async function main() {
   await rewards.deployed();
 
   console.log("Token deployed to:", token.address, "rewards at:", rewards.address);
+
+  await giveTokens(token, 10, 100);
 
   await saveFrontendFiles(token.address);
 }
