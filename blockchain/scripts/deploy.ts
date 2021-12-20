@@ -1,6 +1,6 @@
 import { artifacts, ethers } from "hardhat";
 import * as fs from "fs";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 
 const giveTokens = async (token: Contract, holders: number, totalAmount: number) => {
   let prefixNum = ethers.BigNumber.from("10").pow(38);
@@ -11,7 +11,8 @@ const giveTokens = async (token: Contract, holders: number, totalAmount: number)
 };
 
 async function main() {
-  const tokenSupply = ethers.utils.parseUnits("100", 18);
+  const supplyNum = 1000;
+  const tokenSupply = BigNumber.from(supplyNum);
   const blacklisted = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // dummy address
 
   const tokenFact = await ethers.getContractFactory("MyToken");
@@ -24,7 +25,7 @@ async function main() {
 
   console.log("Token deployed to:", token.address, "rewards at:", rewards.address);
 
-  await giveTokens(token, 10, 100);
+  await giveTokens(token, 10, supplyNum);
 
   await saveFrontendFiles(token.address);
 }

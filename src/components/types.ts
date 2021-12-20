@@ -1,6 +1,8 @@
+import { BigNumber } from "ethers";
+
 export interface SendParams {
   addresses: string[];
-  amounts: number[];
+  amounts: BigNumber[];
   env: string;
 }
 

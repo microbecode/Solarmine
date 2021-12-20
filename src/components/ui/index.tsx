@@ -104,19 +104,20 @@ export function UI(props: Props) {
       console.log("yes");
       let num = +assetAmount;
       num = num * 100000;
-      var big = BigNumber.from(num.toString());
+      var big = BigNumber.from(num.toString())
+        .div(100000)
+        .mul(ethers.utils.parseUnits("1", 18));
 
       const data = await calcDistribution(provider, usedToken, big, usedEnv);
       data.forEach(async (sendItem) => {
-        const signed = await provider
+        /*         const signed = await provider
           .getSigner()
           .signMessage(JSON.stringify(sendItem));
         const sendData: SignedParams = {
           originalMsg: sendItem,
           signedMsg: signed,
         };
-        const toSend = JSON.stringify(sendData);
-
+        const toSend = JSON.stringify(sendData); */
         /*         axios({
           method: "post",
           url: "/.netlify/functions/runTx",
