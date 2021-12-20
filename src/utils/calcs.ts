@@ -2,30 +2,21 @@ import { BigNumber, ethers } from "ethers";
 import { Env, SendParams } from "../components/types";
 import Token from "../contracts/Token.json";
 
-export const calcDistribution = async (
-  provider: ethers.providers.Provider,
-  tokenAddress: string,
-  amount: BigNumber,
-  env: string
+export const splitDistribution = async (
+  params: SendParams,
+  chunkSize: number
 ): Promise<SendParams[]> => {
   const list: SendParams[] = [];
 
-  const full = await calcFullDistribution(provider, tokenAddress, amount, env);
-
-  list.push({
-    addresses: ["a1", "b1"],
-    amounts: [BigNumber.from("10"), BigNumber.from("20")],
-    env: env,
-  });
+  list.push(params);
   //list.push({ addresses: ["a2", "b2"], amounts: [1002, 2002], env: env });
   return list;
 };
 
-const calcFullDistribution = async (
+export const calcFullDistribution = async (
   provider: ethers.providers.Provider,
   tokenAddress: string,
-  totalRewards: BigNumber,
-  env: string
+  totalRewards: BigNumber
 ): Promise<SendParams> => {
   const contract = new ethers.Contract(tokenAddress, Token.abi, provider);
 
@@ -42,6 +33,7 @@ const calcFullDistribution = async (
     adjustedHolders.length
   );
 
+  // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
 
   const amounts: BigNumber[] = [];
@@ -63,7 +55,6 @@ const calcFullDistribution = async (
   const ret: SendParams = {
     addresses: addresses,
     amounts: amounts,
-    env: env,
   };
   console.log(
     "result",

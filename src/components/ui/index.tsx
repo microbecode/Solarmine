@@ -2,7 +2,7 @@ import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
-import { calcDistribution } from "../../utils/calcs";
+import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
 import { SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 
@@ -108,8 +108,9 @@ export function UI(props: Props) {
         .div(100000)
         .mul(ethers.utils.parseUnits("1", 18));
 
-      const data = await calcDistribution(provider, usedToken, big, usedEnv);
-      data.forEach(async (sendItem) => {
+      const fullData = await calcFullDistribution(provider, usedToken, big);
+      const splitData = await splitDistribution(fullData, 100);
+      splitData.forEach(async (sendItem) => {
         /*         const signed = await provider
           .getSigner()
           .signMessage(JSON.stringify(sendItem));
