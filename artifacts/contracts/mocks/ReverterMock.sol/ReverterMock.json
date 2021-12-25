@@ -1,0 +1,15 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ReverterMock",
+  "sourceName": "contracts/mocks/ReverterMock.sol",
+  "abi": [
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50604880601d6000396000f3fe608060405236600d57600080fd5b600080fdfea2646970667358221220435b689ddb5719b87be09776221696d75d1d290ad4754ea09ee85f0c722acdaf64736f6c63430008000033",
+  "deployedBytecode": "0x608060405236600d57600080fd5b600080fdfea2646970667358221220435b689ddb5719b87be09776221696d75d1d290ad4754ea09ee85f0c722acdaf64736f6c63430008000033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
