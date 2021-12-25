@@ -1,11 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { Env, SendParams } from "../components/types";
-import Token from "../contracts/Token.json";
 
-export const splitDistribution = async (
-  params: SendParams,
-  chunkSize: number
-): Promise<SendParams[]> => {
+export const splitDistribution = async (params: SendParams, chunkSize: number): Promise<SendParams[]> => {
   const list: SendParams[] = [];
 
   list.push(params);
@@ -13,25 +9,14 @@ export const splitDistribution = async (
   return list;
 };
 
-export const calcFullDistribution = async (
-  provider: ethers.providers.Provider,
-  tokenAddress: string,
-  totalRewards: BigNumber
-): Promise<SendParams> => {
-  const contract = new ethers.Contract(tokenAddress, Token.abi, provider);
-
+export const calcFullDistribution = async (contract: ethers.Contract, totalRewards: BigNumber): Promise<SendParams> => {
   const supply = BigNumber.from(await contract.totalSupply());
   const holders = (await contract.getHolders()) as string[];
 
   const adjustedSupply = supply; // TODO remove blacklisted balances
   const adjustedHolders = holders; // TODO remove blacklisted holders
 
-  console.log(
-    "calculating for ",
-    totalRewards.toString(),
-    adjustedSupply.toString(),
-    adjustedHolders.length
-  );
+  console.log("calculating for ", totalRewards.toString(), adjustedSupply.toString(), adjustedHolders.length);
 
   // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
@@ -42,11 +27,7 @@ export const calcFullDistribution = async (
   for (let i = 0; i < adjustedHolders.length; i++) {
     const balance = await contract.balanceOf(adjustedHolders[i]);
 
-    const rewardAmount = balance
-      .mul(tempMultiplier)
-      .div(adjustedSupply)
-      .mul(totalRewards)
-      .div(tempMultiplier);
+    const rewardAmount = balance.mul(tempMultiplier).div(adjustedSupply).mul(totalRewards).div(tempMultiplier);
 
     addresses.push(adjustedHolders[i]);
     amounts.push(rewardAmount);

@@ -2,6 +2,7 @@ import { ethers, network, waffle } from "hardhat";
 import { BigNumber, Contract, ContractReceipt, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
+import { calcFullDistribution } from "../src/utils/calcs";
 
 describe("Reward calculations", function () {
   let accounts: SignerWithAddress[];
@@ -14,6 +15,7 @@ describe("Reward calculations", function () {
   let user4: SignerWithAddress;
   let user5: SignerWithAddress;
   const tokenSupply = 1200;
+
   let currentCreatedAddressNumber: number = 0; // so that each test creates their own addresses
 
   beforeEach(async function () {
@@ -31,16 +33,16 @@ describe("Reward calculations", function () {
   });
 
   it("Initial data", async function () {
-    const holders = await token.getHolders();
-    expect(holders.length).to.equal(1);
+    const giveRewards = BigNumber.from("1000");
+    const dist = await calcFullDistribution(token, giveRewards);
+    expect(dist.addresses.length).to.equal(1);
   });
 
   // Generate addresses and send them tokens
   const giveTokens = async (holders: number, totalAmount: number) => {
     let prefixNum = ethers.BigNumber.from("10").pow(38);
     for (let i = 0; i < holders; i++) {
-      const addr =
-        "0x5" + prefixNum.add(currentCreatedAddressNumber++).toString();
+      const addr = "0x5" + prefixNum.add(currentCreatedAddressNumber++).toString();
       await token.mint(addr, totalAmount / holders, { gasPrice: 0 });
     }
   };

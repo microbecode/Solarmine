@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
 import { SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
+import Token from "../../contracts/Token.json";
 
 const isTest = true;
 
@@ -31,11 +32,7 @@ const blacklistedAddresses = {
 };
 
 const usedEnv =
-  window.location.host.indexOf("localhost") > -1
-    ? Env[Env.Local]
-    : isTest
-    ? Env[Env.Test]
-    : Env[Env.Production];
+  window.location.host.indexOf("localhost") > -1 ? Env[Env.Local] : isTest ? Env[Env.Test] : Env[Env.Production];
 
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
@@ -95,20 +92,14 @@ export function UI(props: Props) {
   const confirmSend = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    if (
-      isMyNumeric(assetAmount) &&
-      window.confirm(
-        "Are you sure you want to distribute " + assetAmount + " BNB?"
-      )
-    ) {
+    if (isMyNumeric(assetAmount) && window.confirm("Are you sure you want to distribute " + assetAmount + " BNB?")) {
       console.log("yes");
       let num = +assetAmount;
       num = num * 100000;
-      var big = BigNumber.from(num.toString())
-        .div(100000)
-        .mul(ethers.utils.parseUnits("1", 18));
+      var big = BigNumber.from(num.toString()).div(100000).mul(ethers.utils.parseUnits("1", 18));
 
-      const fullData = await calcFullDistribution(provider, usedToken, big);
+      const contract = new ethers.Contract(usedToken, Token.abi, provider);
+      const fullData = await calcFullDistribution(contract, big);
       const splitData = await splitDistribution(fullData, 100);
       splitData.forEach(async (sendItem) => {
         /*         const signed = await provider
@@ -144,19 +135,11 @@ export function UI(props: Props) {
       <div>Blacklist: {usedBlacklist.join(", ")}</div>
       <div>
         BNB amount:{" "}
-        <input
-          type="text"
-          value={assetAmount.toString()}
-          onChange={(e) => setAssetAmount(e.target.value)}
-        ></input>
+        <input type="text" value={assetAmount.toString()} onChange={(e) => setAssetAmount(e.target.value)}></input>
       </div>
       <div>
         Simulate only:{" "}
-        <input
-          type="checkbox"
-          checked={simulateOnly}
-          onChange={() => setSimulateOnly(!simulateOnly)}
-        ></input>
+        <input type="checkbox" checked={simulateOnly} onChange={() => setSimulateOnly(!simulateOnly)}></input>
       </div>
       <div>
         <input type="button" onClick={confirmSend} value="Send"></input>
