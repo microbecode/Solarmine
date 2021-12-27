@@ -9,10 +9,6 @@ import Token from "../../contracts/Token.json";
 
 const isTest = true;
 
-interface Props {
-  walletAddress: string;
-}
-
 enum Env {
   Local,
   Test,
@@ -37,16 +33,22 @@ const usedEnv =
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
 
+interface Props {
+  walletAddress: string;
+}
+declare var window: any; // to fix 'window.ethereum' errors
+
 export function UI(props: Props) {
   const [usedChainName, setUsedChainName] = useState<string>("");
   const [assetAmount, setAssetAmount] = useState<string>("0");
   //const [weiAmount, setWeiAmount] = useState<string>("0");
   const [simulateOnly, setSimulateOnly] = useState<boolean>(true);
 
+  const amountDecimalRounder = 100000;
   function isMyNumeric(n) {
     if (!isNaN(parseFloat(n)) && isFinite(n)) {
       let num = +n;
-      num = num * 100000;
+      num = num * amountDecimalRounder;
 
       if ((num * 10).toString() === num.toString() + "0") {
         return true;
@@ -57,20 +59,6 @@ export function UI(props: Props) {
 
   const e = "Test";
   console.log("is", !!Env[e]);
-
-  /*   useEffect(() => {
-    try {
-      const res = isNumeric(assetAmount);
-      let num = +res;
-      num = num *
-
-      setWeiAmount(
-        res.mul(BigNumber.from("10").pow(BigNumber.from("18"))).toString()
-      );
-    } catch (ex) {
-      setWeiAmount("Invalid amount");
-    }
-  }, [assetAmount]); */
 
   useEffect(() => {
     const setChainName = async () => {
@@ -95,11 +83,11 @@ export function UI(props: Props) {
     if (isMyNumeric(assetAmount) && window.confirm("Are you sure you want to distribute " + assetAmount + " BNB?")) {
       console.log("yes");
       let num = +assetAmount;
-      num = num * 100000;
-      var big = BigNumber.from(num.toString()).div(100000).mul(ethers.utils.parseUnits("1", 18));
+      num = num * amountDecimalRounder;
+      var big = BigNumber.from(num.toString()).div(amountDecimalRounder).mul(ethers.utils.parseUnits("1", 18));
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
-      const fullData = await calcFullDistribution(contract, big);
+      const fullData = await calcFullDistribution(contract, big, usedBlacklist);
       const splitData = splitDistribution(fullData, 100);
       splitData.forEach(async (sendItem) => {
         /*         const signed = await provider
