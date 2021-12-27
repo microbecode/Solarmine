@@ -16,7 +16,7 @@ export const calcFullDistribution = async (contract: ethers.Contract, totalRewar
   const adjustedSupply = supply; // TODO remove blacklisted balances
   const adjustedHolders = holders; // TODO remove blacklisted holders
 
-  console.log("calculating for ", totalRewards.toString(), adjustedSupply.toString(), adjustedHolders.length);
+  //console.log("calculating for ", totalRewards.toString(), adjustedSupply.toString(), adjustedHolders.length);
 
   // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
@@ -37,11 +37,11 @@ export const calcFullDistribution = async (contract: ethers.Contract, totalRewar
     addresses: addresses,
     amounts: amounts,
   };
-  console.log(
+  /*   console.log(
     "result",
     ret,
     ret.amounts.map((r) => r.toString())
-  );
+  ); */
   return ret;
   //console.log("contr", supply.toString(), contract);
 };
