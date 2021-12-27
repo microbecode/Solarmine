@@ -32,9 +32,14 @@ export const calcFullDistribution = async (
 ): Promise<SendParams> => {
   const supply = BigNumber.from(await contract.totalSupply());
   const holders = (await contract.getHolders()) as string[];
+  let adjustedSupply: BigNumber = supply;
+  let adjustedHolders: string[] = holders;
 
-  const adjustedSupply = supply; // TODO remove blacklisted balances
-  const adjustedHolders = holders; // TODO remove blacklisted holders
+  for (let i = 0; i < blacklist.length; i++) {
+    const balance = await contract.balanceOf(blacklist[i]);
+    adjustedSupply = adjustedSupply.sub(balance);
+    adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i]);
+  }
 
   //console.log("calculating for ", totalRewards.toString(), adjustedSupply.toString(), adjustedHolders.length);
 

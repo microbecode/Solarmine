@@ -100,7 +100,7 @@ export function UI(props: Props) {
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big);
-      const splitData = await splitDistribution(fullData, 100);
+      const splitData = splitDistribution(fullData, 100);
       splitData.forEach(async (sendItem) => {
         /*         const signed = await provider
           .getSigner()

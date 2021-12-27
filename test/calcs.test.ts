@@ -107,11 +107,63 @@ describe("Reward calculations", function () {
     expect(dist.amounts[2]).to.equal(giveRewards.div(10).mul(3));
   });
 
-  // TODO test: dust is reused
+  it("Single blacklisted holder", async function () {
+    const giveRewards = BigNumber.from("1000");
+    const dist = await calcFullDistribution(token, giveRewards, [owner.address]);
 
-  // TODO tests: blacklist
+    expect(dist.addresses.length).to.equal(0);
+    expect(dist.amounts.length).to.equal(0);
+  });
 
-  // TODO tests: reverter
+  it("One blacklisted is removed", async function () {
+    const giveRewards = BigNumber.from("1000");
+    await token.transfer(user1.address, tokenSupply / 2);
+    const dist = await calcFullDistribution(token, giveRewards, [user1.address]);
+
+    expect(dist.addresses.length).to.equal(1);
+    expect(dist.addresses[0]).to.equal(owner.address);
+    expect(dist.amounts.length).to.equal(1);
+    expect(dist.amounts[0]).to.equal(giveRewards);
+  });
+
+  it("Multiple blacklisted are removed", async function () {
+    const giveRewards = BigNumber.from("1000");
+    await token.transfer(user1.address, tokenSupply / 10);
+    await token.transfer(user2.address, tokenSupply / 5);
+    const dist = await calcFullDistribution(token, giveRewards, [user1.address, user2.address]);
+
+    expect(dist.addresses.length).to.equal(1);
+    expect(dist.addresses[0]).to.equal(owner.address);
+    expect(dist.amounts.length).to.equal(1);
+    expect(dist.amounts[0]).to.equal(giveRewards);
+  });
+
+  it("Correct ratios are withheld with blacklist", async function () {
+    const giveRewards = BigNumber.from("1000");
+
+    await token.transfer(user1.address, tokenSupply / 20); // 5%
+    await token.transfer(user2.address, tokenSupply / 5); // 20%
+    await token.transfer(user3.address, tokenSupply / 4); // 25%
+    // owner 50%
+    const dist = await calcFullDistribution(token, giveRewards, [user1.address, user2.address]);
+
+    expect(dist.addresses.length).to.equal(2);
+    expect(dist.addresses[0]).to.equal(owner.address);
+    expect(dist.addresses[1]).to.equal(user3.address);
+    expect(dist.amounts.length).to.equal(2);
+    expect(dist.amounts[0]).to.equal(giveRewards.div(3).mul(2));
+    expect(dist.amounts[1]).to.equal(giveRewards.div(3));
+  });
+
+  // Enable if testing performance. Takes 18 seconds, 80% of it in token minting
+  /*   it("No issues with bigger token holder amounts", async function () {
+    const giveRewards = BigNumber.from("10000");
+
+    await giveTokens(1000, 1000);
+    const dist = await calcFullDistribution(token, giveRewards, [user1.address, user2.address]);
+
+    expect(dist.amounts.length).to.equal(1001);
+  }); */
 
   // Generate addresses and send them tokens
   const giveTokens = async (holders: number, totalAmount: number) => {
@@ -131,8 +183,6 @@ describe("Reward list splitting", function () {
   let user3: SignerWithAddress;
   let user4: SignerWithAddress;
   let user5: SignerWithAddress;
-  const tokenSupply = 120;
-  let currentCreatedAddressNumber: number = 0; // so that each test creates their own addresses
 
   beforeEach(async function () {
     accounts = await ethers.getSigners();
