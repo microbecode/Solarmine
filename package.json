@@ -44,8 +44,8 @@
     "build": "react-scripts build",
     "test": "mocha test/*",
     "eject": "react-scripts eject",
-    "blockchain": "cd blockchain && npx hardhat node",
-    "deploy": "cd blockchain && npx hardhat run scripts/deploy.ts --network localhost"
+    "blockchain": "npx hardhat node",
+    "deploy": "npx hardhat run scripts/deploy.ts --network localhost"
   },
   "eslintConfig": {
     "extends": "react-app",

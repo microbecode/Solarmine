@@ -4,8 +4,14 @@
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react"
   },
   "include": ["./scripts", "./test"],
-  "files": ["./hardhat.config.ts"]
+  "files": [
+    "hardhat.config.ts",
+    "./node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.ts",
+    "./node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.ts",
+    "./node_modules/@openzeppelin/hardhat-upgrades/src/type-extensions.ts"
+  ]
 }
