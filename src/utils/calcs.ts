@@ -41,8 +41,6 @@ export const calcFullDistribution = async (
     adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i]);
   }
 
-  //console.log("calculating for ", totalRewards.toString(), adjustedSupply.toString(), adjustedHolders.length);
-
   // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
 
@@ -62,11 +60,6 @@ export const calcFullDistribution = async (
     addresses: addresses,
     amounts: amounts,
   };
-  /*   console.log(
-    "result",
-    ret,
-    ret.amounts.map((r) => r.toString())
-  ); */
+
   return ret;
-  //console.log("contr", supply.toString(), contract);
 };

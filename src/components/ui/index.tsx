@@ -6,6 +6,7 @@ import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
 import { SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
+import { SendParams } from "../types";
 
 const isTest = true;
 
@@ -43,6 +44,7 @@ export function UI(props: Props) {
   const [assetAmount, setAssetAmount] = useState<string>("0");
   //const [weiAmount, setWeiAmount] = useState<string>("0");
   const [simulateOnly, setSimulateOnly] = useState<boolean>(true);
+  const [resultText, setResultText] = useState<string>("");
 
   const amountDecimalRounder = 100000;
   function isMyNumeric(n) {
@@ -57,10 +59,7 @@ export function UI(props: Props) {
     return false;
   }
 
-  const e = "Test";
-  console.log("is", !!Env[e]);
-
-  useEffect(() => {
+  /* useEffect(() => {
     const setChainName = async () => {
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       const id = parseInt(ethers.BigNumber.from(chainId).toString());
@@ -75,13 +74,12 @@ export function UI(props: Props) {
     if (window.ethereum) {
       setChainName();
     }
-  }, []);
+  }, []); */
 
   const confirmSend = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    if (isMyNumeric(assetAmount) && window.confirm("Are you sure you want to distribute " + assetAmount + " BNB?")) {
-      console.log("yes");
+    const getSplits = async (): Promise<SendParams[]> => {
       let num = +assetAmount;
       num = num * amountDecimalRounder;
       var big = BigNumber.from(num.toString()).div(amountDecimalRounder).mul(ethers.utils.parseUnits("1", 18));
@@ -89,6 +87,35 @@ export function UI(props: Props) {
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
       const splitData = splitDistribution(fullData, 100);
+      return splitData;
+    };
+
+    const getDisplayForSplits = (splits: SendParams[]): string => {
+      let textLines: string[] = [];
+      splits.forEach((split, i) => {
+        const length = split.addresses.length;
+        const totalAmount = split.amounts.reduce((main, curr) => {
+          return main.add(curr);
+        });
+        textLines.push(`Batch number ${length} has ${length} users with total reward ${totalAmount}.`);
+      });
+      const res = textLines.join("br/>");
+      return res;
+    };
+
+    if (simulateOnly && isMyNumeric(assetAmount)) {
+      const splitData = await getSplits();
+      const res = getDisplayForSplits(splitData);
+      setResultText(res);
+    }
+
+    if (
+      isMyNumeric(assetAmount) &&
+      !simulateOnly &&
+      window.confirm("Are you sure you want to distribute " + assetAmount + " BNB?")
+    ) {
+      console.log("yes");
+      const splitData = await getSplits();
       splitData.forEach(async (sendItem) => {
         /*         const signed = await provider
           .getSigner()
@@ -131,6 +158,10 @@ export function UI(props: Props) {
       </div>
       <div>
         <input type="button" onClick={confirmSend} value="Send"></input>
+      </div>
+      <div>Results</div>
+      <div>
+        <input type="textfield" disabled={true} value={resultText}></input>
       </div>
     </div>
   );
