@@ -31,7 +31,7 @@ async function main() {
 }
 
 async function saveFrontendFiles(tokenAddr: string) {
-  const contractsDir = __dirname + "/../../src/contracts";
+  const contractsDir = __dirname + "/contracts";
 
   if (!fs.existsSync(contractsDir)) {
     fs.mkdirSync(contractsDir);
