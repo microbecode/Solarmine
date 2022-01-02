@@ -1,0 +1,80 @@
+
+
+.card {
+  background: inherit;
+
+  .card-header {
+    cursor: pointer;
+  }
+}
+
+.btn-link,
+.btn-link:hover {
+  color: #121212;
+}
+
+.btn:focus,
+.btn:active {
+  outline: none !important;
+  box-shadow: none;
+}
+
+#interact {
+  margin: 10px;
+}
+
+input[type="text"] {
+  width: 500px;
+}
+
+input[type="radio"] {
+  margin: 10px;
+}
+
+label {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+input[type="button"],
+button {
+  margin: 10px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: rgb(159, 191, 226);
+  border: solid 1px transparent;
+  border-radius: 18px;
+}
+
+input[type="text"],
+select {
+  border-radius: 5px;
+  border-width: 1px;
+  padding: 5px;
+}
+
+fieldset {
+  /*  border-style: dotted;
+  border-width: 1px;
+   */
+  border-radius: 5px;
+  border: 1px solid;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+legend {
+  width: 0%;
+}
+
+.myRadio {
+  padding: 10px;
+}
+
+select {
+  margin-right: 10px;
+}
+.functions {
+  padding-left: 10px;
+}
