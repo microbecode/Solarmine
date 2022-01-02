@@ -1,17 +1,31 @@
 {
   "compilerOptions": {
     "target": "es2018",
-    "module": "commonjs",
+    "module": "esnext",
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "jsx": "react"
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
-  "include": ["./scripts", "./test"],
+  "include": [
+    "./scripts",
+    "./test"
+  ],
   "files": [
-    "hardhat.config.ts",
-    "./node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.ts",
-    "./node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.ts",
-    "./node_modules/@openzeppelin/hardhat-upgrades/src/type-extensions.ts"
+    "hardhat.config.ts"
   ]
 }
