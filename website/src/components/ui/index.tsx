@@ -7,6 +7,7 @@ import { SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
 import { SendParams } from "../types";
+import { createNumericLiteral } from "typescript";
 
 const isTest = true;
 
@@ -99,13 +100,14 @@ export function UI(props: Props) {
 
     const getDisplayForSplits = (splits: SendParams[]): string => {
       let textLines: string[] = [];
+      console.log("splits", splits);
       splits.forEach((split, i) => {
         const length = split.addresses.length;
         const totalAmount = split.amounts.reduce((main, curr) => {
           return main.add(curr);
         });
         textLines.push(
-          `Batch number ${length} has ${length} users with total reward ${totalAmount}.`
+          `Batch number ${i} has ${length} users with total reward ${totalAmount}.`
         );
       });
       const res = textLines.join("br/>");
