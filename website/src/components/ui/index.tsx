@@ -16,26 +16,32 @@ enum Env {
   Production,
 }
 
-const tokenAddresses = {
+type Dict = Record<string, any>;
+
+const tokenAddresses: Dict = {
   Local: contractAddress.Token,
   Test: "b",
   Production: "c",
 };
 
-const blacklistedAddresses = {
+const blacklistedAddresses: Dict = {
   Local: [contractAddress.Token],
   Test: ["bb", "bbb"],
   Production: ["cc", "ccc"],
 };
 
 const usedEnv =
-  window.location.host.indexOf("localhost") > -1 ? Env[Env.Local] : isTest ? Env[Env.Test] : Env[Env.Production];
+  window.location.host.indexOf("localhost") > -1
+    ? Env[Env.Local]
+    : isTest
+    ? Env[Env.Test]
+    : Env[Env.Production];
 
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
 
 interface Props {
-  walletAddress: string;
+  walletAddress: string | undefined;
 }
 declare var window: any; // to fix 'window.ethereum' errors
 
@@ -47,8 +53,8 @@ export function UI(props: Props) {
   const [resultText, setResultText] = useState<string>("");
 
   const amountDecimalRounder = 100000;
-  function isMyNumeric(n) {
-    if (!isNaN(parseFloat(n)) && isFinite(n)) {
+  function isMyNumeric(n: string) {
+    if (!isNaN(parseFloat(n)) && isFinite(+n)) {
       let num = +n;
       num = num * amountDecimalRounder;
 
@@ -82,7 +88,9 @@ export function UI(props: Props) {
     const getSplits = async (): Promise<SendParams[]> => {
       let num = +assetAmount;
       num = num * amountDecimalRounder;
-      var big = BigNumber.from(num.toString()).div(amountDecimalRounder).mul(ethers.utils.parseUnits("1", 18));
+      var big = BigNumber.from(num.toString())
+        .div(amountDecimalRounder)
+        .mul(ethers.utils.parseUnits("1", 18));
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
@@ -97,7 +105,9 @@ export function UI(props: Props) {
         const totalAmount = split.amounts.reduce((main, curr) => {
           return main.add(curr);
         });
-        textLines.push(`Batch number ${length} has ${length} users with total reward ${totalAmount}.`);
+        textLines.push(
+          `Batch number ${length} has ${length} users with total reward ${totalAmount}.`
+        );
       });
       const res = textLines.join("br/>");
       return res;
@@ -112,7 +122,9 @@ export function UI(props: Props) {
     if (
       isMyNumeric(assetAmount) &&
       !simulateOnly &&
-      window.confirm("Are you sure you want to distribute " + assetAmount + " BNB?")
+      window.confirm(
+        "Are you sure you want to distribute " + assetAmount + " BNB?"
+      )
     ) {
       console.log("yes");
       const splitData = await getSplits();
@@ -150,11 +162,19 @@ export function UI(props: Props) {
       <div>Blacklist: {usedBlacklist.join(", ")}</div>
       <div>
         BNB amount:{" "}
-        <input type="text" value={assetAmount.toString()} onChange={(e) => setAssetAmount(e.target.value)}></input>
+        <input
+          type="text"
+          value={assetAmount.toString()}
+          onChange={(e) => setAssetAmount(e.target.value)}
+        ></input>
       </div>
       <div>
         Simulate only:{" "}
-        <input type="checkbox" checked={simulateOnly} onChange={() => setSimulateOnly(!simulateOnly)}></input>
+        <input
+          type="checkbox"
+          checked={simulateOnly}
+          onChange={() => setSimulateOnly(!simulateOnly)}
+        ></input>
       </div>
       <div>
         <input type="button" onClick={confirmSend} value="Send"></input>

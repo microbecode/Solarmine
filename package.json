@@ -33,7 +33,7 @@
     "sass": "^1.45.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "yarn --cwd ./website start",
     "build": "react-scripts build",
     "test": "mocha test/*",
     "eject": "react-scripts eject",

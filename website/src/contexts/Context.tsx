@@ -13,9 +13,9 @@ type Web3ContextProps = {
 export const Web3Context = createContext<Partial<Web3ContextProps>>({});
 
 type ContractsContextProps = {
-  myContract: Contract
+  myContract: Contract | null;
 };
 
 export const ContractsContext = createContext<Partial<ContractsContextProps>>(
-  {},
+  {}
 );

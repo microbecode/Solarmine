@@ -2,7 +2,11 @@ import { artifacts, ethers } from "hardhat";
 import * as fs from "fs";
 import { BigNumber, Contract } from "ethers";
 
-const giveTokens = async (token: Contract, holders: number, totalAmount: number) => {
+const giveTokens = async (
+  token: Contract,
+  holders: number,
+  totalAmount: number
+) => {
   let prefixNum = ethers.BigNumber.from("10").pow(38);
   for (let i = 0; i < holders; i++) {
     const addr = "0x5" + prefixNum.add(i).toString();
@@ -20,10 +24,17 @@ async function main() {
   await token.deployed();
 
   const rewardsFact = await ethers.getContractFactory("Rewards");
-  const rewards = await rewardsFact.deploy(token.address, blacklisted, { gasPrice: 0 });
+  const rewards = await rewardsFact.deploy(token.address, blacklisted, {
+    gasPrice: 0,
+  });
   await rewards.deployed();
 
-  console.log("Token deployed to:", token.address, "rewards at:", rewards.address);
+  console.log(
+    "Token deployed to:",
+    token.address,
+    "rewards at:",
+    rewards.address
+  );
 
   await giveTokens(token, 10, supplyNum);
 
@@ -31,7 +42,7 @@ async function main() {
 }
 
 async function saveFrontendFiles(tokenAddr: string) {
-  const contractsDir = __dirname + "/contracts";
+  const contractsDir = __dirname + "/../website/src/contracts";
 
   if (!fs.existsSync(contractsDir)) {
     fs.mkdirSync(contractsDir);
@@ -50,7 +61,10 @@ async function saveFrontendFiles(tokenAddr: string) {
 
   const TokenArtifact = artifacts.readArtifactSync("MyTokenMock");
 
-  fs.writeFileSync(contractsDir + "/Token.json", JSON.stringify(TokenArtifact, null, 2));
+  fs.writeFileSync(
+    contractsDir + "/Token.json",
+    JSON.stringify(TokenArtifact, null, 2)
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere

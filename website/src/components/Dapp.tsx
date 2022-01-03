@@ -32,7 +32,9 @@ declare global {
 }
 
 export function Dapp() {
-  const [selectedAddress, setSelectedAddress] = useState<string>(undefined);
+  const [selectedAddress, setSelectedAddress] = useState<string | undefined>(
+    undefined
+  );
 
   // This method resets the state
   function _resetState() {
@@ -61,7 +63,7 @@ export function Dapp() {
       // list of sites allowed access to your addresses" (Metamask > Settings > Connections)
       // To avoid errors, we reset the dapp state
       if (newAddress === undefined) {
-        return this._resetState();
+        return _resetState();
       }
 
       _initialize(newAddress);
