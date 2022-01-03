@@ -57,7 +57,6 @@ export function UI(props: Props) {
     if (!isNaN(parseFloat(n)) && isFinite(+n)) {
       let num = +n;
       num = num * amountDecimalRounder;
-
       if ((num * 10).toString() === num.toString() + "0") {
         return true;
       }
@@ -117,11 +116,9 @@ export function UI(props: Props) {
       const splitData = await getSplits();
       const res = getDisplayForSplits(splitData);
       setResultText(res);
-    }
-
-    if (
+    } else if (
       isMyNumeric(assetAmount) &&
-      !simulateOnly &&
+      //!simulateOnly &&
       window.confirm(
         "Are you sure you want to distribute " + assetAmount + " BNB?"
       )
