@@ -3,7 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
-import { SignedParams } from "../types";
+import { ContractAddress, SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
 import { SendParams } from "../types";
@@ -17,18 +17,27 @@ enum Env {
   Production,
 }
 
-type Dict = Record<string, any>;
+type Dict<T> = Record<string, T>;
 
-const tokenAddresses: Dict = {
+const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
-  Test: "b",
-  Production: "c",
+  Test: contractAddress.Token,
+  Production: contractAddress.Token,
 };
 
-const blacklistedAddresses: Dict = {
-  Local: [contractAddress.Token],
-  Test: ["bb", "bbb"],
-  Production: ["cc", "ccc"],
+const blacklistedAddresses: Dict<ContractAddress[]> = {
+  Local: [
+    { address: contractAddress.Token, title: "Some address" },
+    { address: contractAddress.Token, title: "Some other address" },
+  ],
+  Test: [
+    { address: contractAddress.Token, title: "Some address" },
+    { address: contractAddress.Token, title: "Some other address" },
+  ],
+  Production: [
+    { address: contractAddress.Token, title: "Some address" },
+    { address: contractAddress.Token, title: "Some other address" },
+  ],
 };
 
 const usedEnv =
@@ -51,7 +60,7 @@ export function UI(props: Props) {
   const [assetAmount, setAssetAmount] = useState<string>("0");
   //const [weiAmount, setWeiAmount] = useState<string>("0");
   const [simulateOnly, setSimulateOnly] = useState<boolean>(true);
-  const [resultText, setResultText] = useState<string>("");
+  const [resultText, setResultText] = useState<string[]>([]);
 
   const amountDecimalRounder = 100000;
   function isMyNumeric(n: string) {
@@ -94,11 +103,12 @@ export function UI(props: Props) {
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
-      const splitData = splitDistribution(fullData, 100);
+
+      const splitData = splitDistribution(fullData, 4);
       return splitData;
     };
 
-    const getDisplayForSplits = (splits: SendParams[]): string => {
+    const getDisplayForSplits = (splits: SendParams[]): string[] => {
       let textLines: string[] = [];
       console.log("splits", splits);
       splits.forEach((split, i) => {
@@ -106,12 +116,14 @@ export function UI(props: Props) {
         const totalAmount = split.amounts.reduce((main, curr) => {
           return main.add(curr);
         });
+        const totalStr = ethers.utils.formatUnits(totalAmount, 18);
         textLines.push(
-          `Batch number ${i} has ${length} users with total reward ${totalAmount}.`
+          `Batch number ${
+            i + 1
+          } has ${length} users with total reward ${totalStr} BNB`
         );
       });
-      const res = textLines.join("br/>");
-      return res;
+      return textLines;
     };
 
     if (simulateOnly && isMyNumeric(assetAmount)) {
@@ -156,9 +168,16 @@ export function UI(props: Props) {
   return (
     <div className="create-container pt-5 pb-0 px-5" id="what">
       <div>Used environment: {usedEnv}</div>
-      <div>Your wallet: {props.walletAddress}</div>
+      <div>Your wallet: {props.walletAddress}</div>{" "}
       <div>Used token: {usedToken}</div>
-      <div>Blacklist: {usedBlacklist.join(", ")}</div>
+      <div>
+        Blacklisted addresses:{" "}
+        {usedBlacklist.map((b) => (
+          <span style={{ margin: "15px" }}>
+            {b.address + " (" + b.title + ")"}
+          </span>
+        ))}
+      </div>
       <div>
         BNB amount:{" "}
         <input
@@ -180,7 +199,13 @@ export function UI(props: Props) {
       </div>
       <div>Results</div>
       <div>
-        <input type="textfield" disabled={true} value={resultText}></input>
+        {resultText.map((text) => {
+          return (
+            <div>
+              <input type="text" disabled={true} value={text}></input>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

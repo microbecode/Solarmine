@@ -1,8 +1,11 @@
 import { BigNumber, ethers } from "ethers";
-import { Env, SendParams } from "../components/types";
+import { ContractAddress, Env, SendParams } from "../components/types";
 
 // Split the reward list into chunks
-export const splitDistribution = (params: SendParams, chunkSize: number): SendParams[] => {
+export const splitDistribution = (
+  params: SendParams,
+  chunkSize: number
+): SendParams[] => {
   if (params.addresses.length != params.amounts.length) {
     throw "internal error";
   }
@@ -28,7 +31,7 @@ export const splitDistribution = (params: SendParams, chunkSize: number): SendPa
 export const calcFullDistribution = async (
   contract: ethers.Contract,
   totalRewards: BigNumber,
-  blacklist: string[]
+  blacklist: ContractAddress[]
 ): Promise<SendParams> => {
   const supply = BigNumber.from(await contract.totalSupply());
   const holders = (await contract.getHolders()) as string[];
@@ -36,9 +39,9 @@ export const calcFullDistribution = async (
   let adjustedHolders: string[] = holders;
 
   for (let i = 0; i < blacklist.length; i++) {
-    const balance = await contract.balanceOf(blacklist[i]);
+    const balance = await contract.balanceOf(blacklist[i].address);
     adjustedSupply = adjustedSupply.sub(balance);
-    adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i]);
+    adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i].address);
   }
 
   // Used to avoid rounding issues
@@ -50,7 +53,11 @@ export const calcFullDistribution = async (
   for (let i = 0; i < adjustedHolders.length; i++) {
     const balance = await contract.balanceOf(adjustedHolders[i]);
 
-    const rewardAmount = balance.mul(tempMultiplier).div(adjustedSupply).mul(totalRewards).div(tempMultiplier);
+    const rewardAmount = balance
+      .mul(tempMultiplier)
+      .div(adjustedSupply)
+      .mul(totalRewards)
+      .div(tempMultiplier);
 
     addresses.push(adjustedHolders[i]);
     amounts.push(rewardAmount);

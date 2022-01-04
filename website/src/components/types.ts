@@ -16,3 +16,8 @@ export enum Env {
   Test,
   Production,
 }
+
+export interface ContractAddress {
+  address: string;
+  title: string;
+}
