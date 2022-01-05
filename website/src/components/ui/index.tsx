@@ -22,21 +22,33 @@ type Dict<T> = Record<string, T>;
 const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
   Test: contractAddress.Token,
-  Production: contractAddress.Token,
+  Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
 
 const blacklistedAddresses: Dict<ContractAddress[]> = {
   Local: [
     { address: contractAddress.Token, title: "Some address" },
-    { address: contractAddress.Token, title: "Some other address" },
+    {
+      address: "0x000000000000000000000000000000000000dEaD",
+      title: "Burn address",
+    },
   ],
   Test: [
     { address: contractAddress.Token, title: "Some address" },
-    { address: contractAddress.Token, title: "Some other address" },
+    {
+      address: "0x000000000000000000000000000000000000dEaD",
+      title: "Burn address",
+    },
   ],
   Production: [
-    { address: contractAddress.Token, title: "Some address" },
-    { address: contractAddress.Token, title: "Some other address" },
+    {
+      address: "0x3DBc4D96869B855cCCe35576E0bd4b967F61C67c",
+      title: "DEX address",
+    },
+    {
+      address: "0x000000000000000000000000000000000000dEaD",
+      title: "Burn address",
+    },
   ],
 };
 
@@ -123,6 +135,7 @@ export function UI(props: Props) {
           } has ${length} users with total reward ${totalStr} BNB`
         );
       });
+      c;
       return textLines;
     };
 
