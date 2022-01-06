@@ -18,8 +18,8 @@ async function main() {
   const supplyNum = 1000;
   const tokenSupply = BigNumber.from(supplyNum);
 
-  const tokenFact = await ethers.getContractFactory("MyToken");
-  const token = await tokenFact.deploy(tokenSupply, "", "");
+  const tokenFact = await ethers.getContractFactory("MyTokenMock");
+  const token = await tokenFact.deploy(tokenSupply);
   await token.deployed();
 
   const rewardsFact = await ethers.getContractFactory("SimpleRewards");

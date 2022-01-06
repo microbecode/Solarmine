@@ -8,7 +8,7 @@ import "../MyToken.sol";
 contract MyTokenMock is MyToken {
     constructor(uint256 initialBalance)
         payable
-        MyToken(initialBalance, "", "")
+        MyToken(initialBalance, "Solarmine", "SM")
     {}
 
     function mint(address account, uint256 amount) public {
