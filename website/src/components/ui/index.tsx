@@ -10,7 +10,7 @@ import Rewards from "../../contracts/Rewards.json";
 import { SendParams } from "../types";
 
 const isTest = true;
-const batchSize = 100;
+const batchSize = 3;
 
 enum Env {
   Local,
