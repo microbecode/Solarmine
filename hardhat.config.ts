@@ -1,8 +1,14 @@
 //require('dotenv').config()
 
 import "@nomiclabs/hardhat-waffle";
+import dotenv from "dotenv";
+dotenv.config();
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
+
+const privKeyTestnet = process.env.TESTNET_PRIVATE_KEY;
+const providerTestnet = process.env.TESTNET_PROVIDER_URL;
+//const providerMainnet = process.env.PROVIDER_MAINNET;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -13,6 +19,11 @@ module.exports = {
     hardhat: {
       blockGasLimit: 80000000,
       initialBaseFeePerGas: 0, // workaround from https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136 . Remove when that issue is closed.
+    },
+    bsctestnet: {
+      url: providerTestnet,
+      accounts: [privKeyTestnet],
+      gasPrice: 1000000000, // 1gwei
     },
   },
   mocha: {

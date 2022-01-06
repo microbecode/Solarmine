@@ -10,7 +10,7 @@ import Rewards from "../../contracts/Rewards.json";
 import { SendParams } from "../types";
 
 const isTest = true;
-const batchSize = 1;
+const batchSize = 100;
 
 enum Env {
   Local,
@@ -22,13 +22,14 @@ type Dict<T> = Record<string, T>;
 
 const rewardAddresses: Dict<string> = {
   Local: contractAddress.Rewards,
-  Test: contractAddress.Rewards,
+  Test: "0x2a4B0ebe6CfB7D7b13c36A4caf4AbaB094491Bc7",
   Production: "0xabc",
 };
 
 const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
-  Test: contractAddress.Token,
+  //Test: "0x16420b7b4e91cfc801d1eb10688a0d2293fe3e5f", // DAGO token, 2700 holders
+  Test: "0xd13978e6a8b94a0857d8187017b28f43c018bd2a", // Mouse haunt token, 13 holders
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
 
