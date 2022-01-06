@@ -1,5 +1,5 @@
 [build]
-  command = "CI='' yarn && npx react-scripts build"
+  command = "CI= npm run build"
   publish = "build"
 
 [build.environment]
