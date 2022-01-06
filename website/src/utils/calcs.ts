@@ -67,11 +67,18 @@ export const calcFullDistribution = async (
   for (let i = 0; i < adjustedHolders.length; i++) {
     const balance = await contract.balanceOf(adjustedHolders[i]);
 
-    const rewardAmount = balance
+    const rewardAmount: BigNumber = balance
       .mul(tempMultiplier)
       .div(adjustedSupply)
       .mul(totalRewards)
       .div(tempMultiplier);
+
+    console.log(
+      "found holder",
+      adjustedHolders[i],
+      balance.toString(),
+      rewardAmount.toString()
+    );
 
     addresses.push(adjustedHolders[i]);
     amounts.push(rewardAmount);
