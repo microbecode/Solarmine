@@ -22,7 +22,7 @@ type Dict<T> = Record<string, T>;
 
 const rewardAddresses: Dict<string> = {
   Local: contractAddress.Rewards,
-  Test: "0x2a4B0ebe6CfB7D7b13c36A4caf4AbaB094491Bc7",
+  Test: "0xA761036cA1f3e66b178aE20d1C2bdE05b7A9BB35",
   Production: "0xabc",
 };
 

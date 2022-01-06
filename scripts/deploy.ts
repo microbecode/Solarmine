@@ -5,18 +5,17 @@ import { BigNumber, Contract } from "ethers";
 const giveTokens = async (
   token: Contract,
   holders: number,
-  totalAmount: number
+  totalAmount: BigNumber
 ) => {
   let prefixNum = ethers.BigNumber.from("10").pow(38);
   for (let i = 0; i < holders; i++) {
     const addr = "0x5" + prefixNum.add(i).toString();
-    await token.transfer(addr, totalAmount / holders);
+    await token.transfer(addr, totalAmount.div(holders));
   }
 };
 
 async function main() {
-  const supplyNum = 1000;
-  const tokenSupply = BigNumber.from(supplyNum);
+  const tokenSupply = BigNumber.from(10000).mul(BigNumber.from("10").pow("18"));
 
   const tokenFact = await ethers.getContractFactory("MyTokenMock");
   const token = await tokenFact.deploy(tokenSupply);
@@ -33,7 +32,7 @@ async function main() {
     rewards.address
   );
 
-  await giveTokens(token, 10, supplyNum);
+  await giveTokens(token, 10, tokenSupply);
 
   await saveFrontendFiles(token.address, rewards.address);
 }
