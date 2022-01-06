@@ -23,8 +23,8 @@ async function main() {
   const token = await tokenFact.deploy(tokenSupply, "", "", { gasPrice: 0 });
   await token.deployed();
 
-  const rewardsFact = await ethers.getContractFactory("Rewards");
-  const rewards = await rewardsFact.deploy(token.address, blacklisted, {
+  const rewardsFact = await ethers.getContractFactory("SimpleRewards");
+  const rewards = await rewardsFact.deploy({
     gasPrice: 0,
   });
   await rewards.deployed();
@@ -36,12 +36,12 @@ async function main() {
     rewards.address
   );
 
-  await giveTokens(token, 10, supplyNum);
+  await giveTokens(token, 2, supplyNum);
 
-  await saveFrontendFiles(token.address);
+  await saveFrontendFiles(token.address, rewards.address);
 }
 
-async function saveFrontendFiles(tokenAddr: string) {
+async function saveFrontendFiles(tokenAddr: string, rewardAddr: string) {
   const contractsDir = __dirname + "/../website/src/contracts";
 
   if (!fs.existsSync(contractsDir)) {
@@ -53,6 +53,7 @@ async function saveFrontendFiles(tokenAddr: string) {
     JSON.stringify(
       {
         Token: tokenAddr,
+        Rewards: rewardAddr,
       },
       undefined,
       2
@@ -60,10 +61,16 @@ async function saveFrontendFiles(tokenAddr: string) {
   );
 
   const TokenArtifact = artifacts.readArtifactSync("MyTokenMock");
+  const RewardsArtifact = artifacts.readArtifactSync("SimpleRewards");
 
   fs.writeFileSync(
     contractsDir + "/Token.json",
     JSON.stringify(TokenArtifact, null, 2)
+  );
+
+  fs.writeFileSync(
+    contractsDir + "/Rewards.json",
+    JSON.stringify(RewardsArtifact, null, 2)
   );
 }
 

@@ -12,14 +12,27 @@ export const splitDistribution = (
 
   const list: SendParams[] = [];
 
-  let currItem: SendParams = { addresses: [], amounts: [] };
+  let currItemTotalAmount: BigNumber = BigNumber.from("0");
+  let currItem: SendParams = {
+    addresses: [],
+    amounts: [],
+    totalAmount: currItemTotalAmount,
+  };
+
   for (let i = 0; i < params.addresses.length; i++) {
     currItem.addresses.push(params.addresses[i]);
     currItem.amounts.push(params.amounts[i]);
+    currItemTotalAmount = currItemTotalAmount.add(params.amounts[i]);
 
-    if (currItem.addresses.length == chunkSize) {
+    if (currItem.addresses.length === chunkSize) {
+      currItem.totalAmount = currItemTotalAmount;
+      currItemTotalAmount = BigNumber.from("0");
       list.push({ ...currItem });
-      currItem = { addresses: [], amounts: [] };
+      currItem = {
+        addresses: [],
+        amounts: [],
+        totalAmount: BigNumber.from("0"),
+      };
     }
   }
   if (currItem.addresses.length > 0) {
@@ -66,6 +79,7 @@ export const calcFullDistribution = async (
   const ret: SendParams = {
     addresses: addresses,
     amounts: amounts,
+    totalAmount: totalRewards,
   };
 
   return ret;

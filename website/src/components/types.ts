@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 export interface SendParams {
   addresses: string[];
   amounts: BigNumber[];
-  //env: string;
+  totalAmount: BigNumber;
 }
 
 export interface SignedParams {

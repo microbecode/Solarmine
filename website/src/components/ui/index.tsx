@@ -6,10 +6,11 @@ import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
 import { ContractAddress, SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
+import Rewards from "../../contracts/Rewards.json";
 import { SendParams } from "../types";
-import { createNumericLiteral } from "typescript";
 
 const isTest = true;
+const batchSize = 1;
 
 enum Env {
   Local,
@@ -19,6 +20,12 @@ enum Env {
 
 type Dict<T> = Record<string, T>;
 
+const rewardAddresses: Dict<string> = {
+  Local: contractAddress.Rewards,
+  Test: contractAddress.Rewards,
+  Production: "0xabc",
+};
+
 const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
   Test: contractAddress.Token,
@@ -27,14 +34,20 @@ const tokenAddresses: Dict<string> = {
 
 const blacklistedAddresses: Dict<ContractAddress[]> = {
   Local: [
-    { address: contractAddress.Token, title: "Some address" },
+    {
+      address: "0x000000000000000000000000000000000000abcd",
+      title: "Some address",
+    },
     {
       address: "0x000000000000000000000000000000000000dEaD",
       title: "Burn address",
     },
   ],
   Test: [
-    { address: contractAddress.Token, title: "Some address" },
+    {
+      address: "0x000000000000000000000000000000000000abcd",
+      title: "Some address",
+    },
     {
       address: "0x000000000000000000000000000000000000dEaD",
       title: "Burn address",
@@ -59,6 +72,7 @@ const usedEnv =
     ? Env[Env.Test]
     : Env[Env.Production];
 
+const usedRewards = rewardAddresses[usedEnv];
 const usedToken = tokenAddresses[usedEnv];
 const usedBlacklist = blacklistedAddresses[usedEnv];
 
@@ -116,7 +130,7 @@ export function UI(props: Props) {
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
 
-      const splitData = splitDistribution(fullData, 4);
+      const splitData = splitDistribution(fullData, batchSize);
       return splitData;
     };
 
@@ -135,44 +149,53 @@ export function UI(props: Props) {
           } has ${length} users with total reward ${totalStr} BNB`
         );
       });
-      c;
       return textLines;
     };
-
-    if (simulateOnly && isMyNumeric(assetAmount)) {
-      const splitData = await getSplits();
-      const res = getDisplayForSplits(splitData);
-      setResultText(res);
-    } else if (
-      isMyNumeric(assetAmount) &&
-      //!simulateOnly &&
-      window.confirm(
-        "Are you sure you want to distribute " + assetAmount + " BNB?"
-      )
-    ) {
-      console.log("yes");
-      const splitData = await getSplits();
-      splitData.forEach(async (sendItem) => {
-        /*         const signed = await provider
-          .getSigner()
-          .signMessage(JSON.stringify(sendItem));
-        const sendData: SignedParams = {
-          originalMsg: sendItem,
-          signedMsg: signed,
-        };
-        const toSend = JSON.stringify(sendData); */
-        /*         axios({
-          method: "post",
-          url: "/.netlify/functions/runTx",
-          data: toSend,
-          headers: {
-            "Content-Type": "application/json",
-          },
+    if (isMyNumeric(assetAmount)) {
+      if (simulateOnly) {
+        const splitData = await getSplits();
+        const res = getDisplayForSplits(splitData);
+        setResultText(res);
+      } else if (
+        window.confirm(
+          "Are you sure you want to distribute " + assetAmount + " BNB?"
+        )
+      ) {
+        console.log("yes");
+        const splitData = await getSplits();
+        splitData.forEach(async (sendItem) => {
+          const contract = new ethers.Contract(
+            usedRewards,
+            Rewards.abi,
+            provider.getSigner()
+          );
+          const res = await contract.distribute(
+            sendItem.addresses,
+            sendItem.amounts,
+            { value: sendItem.totalAmount }
+          );
+          await res.wait();
+          /*         const signed = await provider
+            .getSigner()
+            .signMessage(JSON.stringify(sendItem));
+          const sendData: SignedParams = {
+            originalMsg: sendItem,
+            signedMsg: signed,
+          };
+          const toSend = JSON.stringify(sendData); */
+          /*         axios({
+            method: "post",
+            url: "/.netlify/functions/runTx",
+            data: toSend,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+  
+          const res = await axios.post("/.netlify/functions/runTx", toSend);
+          console.log("send result", res, toSend); */
         });
-
-        const res = await axios.post("/.netlify/functions/runTx", toSend);
-        console.log("send result", res, toSend); */
-      });
+      }
     } else {
       alert("Fix your amount");
     }
@@ -185,8 +208,8 @@ export function UI(props: Props) {
       <div>Used token: {usedToken}</div>
       <div>
         Blacklisted addresses:{" "}
-        {usedBlacklist.map((b) => (
-          <span style={{ margin: "15px" }}>
+        {usedBlacklist.map((b, i) => (
+          <span key={i} style={{ margin: "15px" }}>
             {b.address + " (" + b.title + ")"}
           </span>
         ))}
@@ -212,9 +235,9 @@ export function UI(props: Props) {
       </div>
       <div>Results</div>
       <div>
-        {resultText.map((text) => {
+        {resultText.map((text, i) => {
           return (
-            <div>
+            <div key={i}>
               <input type="text" disabled={true} value={text}></input>
             </div>
           );
