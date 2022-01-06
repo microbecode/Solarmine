@@ -124,6 +124,7 @@ describe("Reward calculations", function () {
       { address: owner.address, title: "" },
     ]);
 
+    expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(0);
     expect(dist.amounts.length).to.equal(0);
   });
@@ -135,6 +136,7 @@ describe("Reward calculations", function () {
       { address: user1.address, title: "" },
     ]);
 
+    expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
     expect(dist.addresses[0]).to.equal(owner.address);
     expect(dist.amounts.length).to.equal(1);
@@ -150,6 +152,7 @@ describe("Reward calculations", function () {
       { address: user2.address, title: "" },
     ]);
 
+    expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
     expect(dist.addresses[0]).to.equal(owner.address);
     expect(dist.amounts.length).to.equal(1);
@@ -168,6 +171,7 @@ describe("Reward calculations", function () {
       { address: user2.address, title: "" },
     ]);
 
+    expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(2);
     expect(dist.addresses[0]).to.equal(owner.address);
     expect(dist.addresses[1]).to.equal(user3.address);
@@ -249,6 +253,11 @@ describe("Reward list splitting", function () {
       .reduce((a, b) => a.concat(b));
 
     expect(split.length).to.equal(3);
+
+    expect(split[0].totalAmount).to.equal(BigNumber.from("3"));
+    expect(split[1].totalAmount).to.equal(BigNumber.from("7"));
+    expect(split[2].totalAmount).to.equal(BigNumber.from("11"));
+
     expect(split[0].addresses.length).to.equal(2);
     expect(split[0].amounts.length).to.equal(2);
     expect(split[1].addresses.length).to.equal(2);
@@ -274,6 +283,10 @@ describe("Reward list splitting", function () {
       .reduce((a, b) => a.concat(b));
 
     expect(split.length).to.equal(2);
+
+    expect(split[0].totalAmount).to.equal(BigNumber.from("6"));
+    expect(split[1].totalAmount).to.equal(BigNumber.from("9"));
+
     expect(split[0].addresses.length).to.equal(3);
     expect(split[0].amounts.length).to.equal(3);
     expect(split[1].addresses.length).to.equal(2);

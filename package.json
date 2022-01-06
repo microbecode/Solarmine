@@ -36,7 +36,7 @@
   "scripts": {
     "start": "yarn --cwd ./website start",
     "build": "react-scripts build",
-    "test": "mocha test/*",
+    "test": "npx hardhat test",
     "eject": "react-scripts eject",
     "blockchain": "npx hardhat node",
     "deploy": "npx hardhat run scripts/deploy.ts --network localhost"

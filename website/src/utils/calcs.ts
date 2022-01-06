@@ -36,6 +36,7 @@ export const splitDistribution = (
     }
   }
   if (currItem.addresses.length > 0) {
+    currItem.totalAmount = currItemTotalAmount;
     list.push(currItem);
   }
   return list;
