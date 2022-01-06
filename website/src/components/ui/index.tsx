@@ -28,8 +28,7 @@ const rewardAddresses: Dict<string> = {
 
 const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
-  //Test: "0x16420b7b4e91cfc801d1eb10688a0d2293fe3e5f", // DAGO token, 2700 holders
-  Test: "0xd13978e6a8b94a0857d8187017b28f43c018bd2a", // Mouse haunt token, 13 holders
+  Test: "0x1Bd031F02790e36CA49Cc1359b16c08c79ab2748",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
 
@@ -130,6 +129,7 @@ export function UI(props: Props) {
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
+      console.log("calculated full", fullData);
 
       const splitData = splitDistribution(fullData, batchSize);
       return splitData;
@@ -155,6 +155,7 @@ export function UI(props: Props) {
     if (isMyNumeric(assetAmount)) {
       if (simulateOnly) {
         const splitData = await getSplits();
+        console.log("got splits", splitData);
         const res = getDisplayForSplits(splitData);
         setResultText(res);
       } else if (
