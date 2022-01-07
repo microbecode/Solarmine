@@ -27,7 +27,7 @@ const rewardAddresses: Dict<string> = {
 };
 
 const tokenAddresses: Dict<string> = {
-  Local: contractAddress.Token,
+  Local: "0xaba91fa7b4d090be80c4108e925628106e9be49e", //contractAddress.Token,
   Test: "0xA761036cA1f3e66b178aE20d1C2bdE05b7A9BB35",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
@@ -100,6 +100,17 @@ export function UI(props: Props) {
     return false;
   }
 
+  const updateHoldersReceived = (
+    amount: number,
+    holderBalanceAmount: number,
+    total: number
+  ) => {
+    setResultText([
+      "Received holders: " + amount + " / " + total,
+      "Received holder balances: " + holderBalanceAmount + " / " + total,
+    ]);
+  };
+
   /* useEffect(() => {
     const setChainName = async () => {
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
@@ -129,7 +140,12 @@ export function UI(props: Props) {
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
 
-      const fullData = await calcFullDistribution(contract, big, usedBlacklist);
+      const fullData = await calcFullDistribution(
+        contract,
+        big,
+        usedBlacklist,
+        updateHoldersReceived
+      );
       console.log("calculated full", fullData);
 
       const splitData = splitDistribution(fullData, batchSize);
@@ -138,7 +154,6 @@ export function UI(props: Props) {
 
     const getDisplayForSplits = (splits: SendParams[]): string[] => {
       let textLines: string[] = [];
-      console.log("splits", splits);
       splits.forEach((split, i) => {
         const length = split.addresses.length;
         const totalAmount = split.amounts.reduce((main, curr) => {

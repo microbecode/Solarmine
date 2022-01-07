@@ -45,13 +45,18 @@ export const splitDistribution = (
 export const calcFullDistribution = async (
   contract: ethers.Contract,
   totalRewards: BigNumber,
-  blacklist: ContractAddress[]
+  blacklist: ContractAddress[],
+  updateHoldersReceived: (
+    holderAmount: number,
+    holderBalanceAmount: number,
+    total: number
+  ) => void
 ): Promise<SendParams> => {
   console.log("starting");
   const supply = BigNumber.from(await contract.totalSupply());
   console.log("supply", supply);
 
-  const holders = await getHolders(contract);
+  const holders = await getHolders(contract, updateHoldersReceived);
   console.log("got holders", holders.length);
   let adjustedSupply: BigNumber = supply;
   let adjustedHolders: string[] = holders;
@@ -71,18 +76,22 @@ export const calcFullDistribution = async (
   for (let i = 0; i < adjustedHolders.length; i++) {
     const balance = await contract.balanceOf(adjustedHolders[i]);
 
+    if (updateHoldersReceived) {
+      updateHoldersReceived(adjustedHolders.length, i, adjustedHolders.length);
+    }
+
     const rewardAmount: BigNumber = balance
       .mul(tempMultiplier)
       .div(adjustedSupply)
       .mul(totalRewards)
       .div(tempMultiplier);
 
-    console.log(
+    /*     console.log(
       "found holder",
       adjustedHolders[i],
       balance.toString(),
       rewardAmount.toString()
-    );
+    ); */
 
     addresses.push(adjustedHolders[i]);
     amounts.push(rewardAmount);
@@ -97,12 +106,19 @@ export const calcFullDistribution = async (
   return ret;
 };
 
-const getHolders = async (contract: ethers.Contract): Promise<string[]> => {
-  const batchSize = 5;
+const getHolders = async (
+  contract: ethers.Contract,
+  updateHoldersReceived: (
+    holderAmount: number,
+    holderBalanceAmount: number,
+    total: number
+  ) => void
+): Promise<string[]> => {
+  const batchSize = 50;
   const total = await contract.getHolderAmount();
   let allHolders: string[] = [];
 
-  const batches = Math.ceil(total / batchSize);
+  const batches = 15; //Math.ceil(total / batchSize);
   for (let i = 0; i < batches; i++) {
     const offset = i * batchSize;
     const batchHolders = (await contract.getPagedHolders(
@@ -110,6 +126,10 @@ const getHolders = async (contract: ethers.Contract): Promise<string[]> => {
       offset
     )) as string[];
     allHolders = allHolders.concat(batchHolders);
+    console.log("have holders: " + allHolders.length);
+    if (updateHoldersReceived) {
+      updateHoldersReceived(allHolders.length, 0, total);
+    }
   }
 
   return allHolders;
