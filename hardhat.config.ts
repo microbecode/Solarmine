@@ -12,7 +12,8 @@ const providerTestnet = process.env.TESTNET_PROVIDER_URL;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const settings = {
+
+module.exports = {
   solidity: "0.8.0",
   networks: {
     hardhat: {
@@ -36,4 +37,3 @@ const settings = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   }, */
 };
-module.exports = settings;

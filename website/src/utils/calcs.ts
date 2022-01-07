@@ -50,9 +50,8 @@ export const calcFullDistribution = async (
   console.log("starting");
   const supply = BigNumber.from(await contract.totalSupply());
   console.log("supply", supply);
-  const origHolders = await contract.getPagedHolders(100, 0);
-  console.log("orig", origHolders);
-  const holders = origHolders as string[];
+
+  const holders = await getHolders(contract);
   console.log("got holders", holders.length);
   let adjustedSupply: BigNumber = supply;
   let adjustedHolders: string[] = holders;
@@ -96,4 +95,22 @@ export const calcFullDistribution = async (
   };
 
   return ret;
+};
+
+const getHolders = async (contract: ethers.Contract): Promise<string[]> => {
+  const batchSize = 5;
+  const total = await contract.getHolderAmount();
+  let allHolders: string[] = [];
+
+  const batches = Math.ceil(total / batchSize);
+  for (let i = 0; i < batches; i++) {
+    const offset = i * batchSize;
+    const batchHolders = (await contract.getPagedHolders(
+      batchSize,
+      offset
+    )) as string[];
+    allHolders = allHolders.concat(batchHolders);
+  }
+
+  return allHolders;
 };

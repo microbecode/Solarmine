@@ -38,7 +38,7 @@
     "build": "react-scripts build",
     "test": "npx hardhat test",
     "eject": "react-scripts eject",
-    "blockchain": "npx hardhat node",
+    "blockchain": "npx hardhat node --config hardhat.config.ts",
     "fork": "npx hardhat node --config hardhatfork.config.ts",
     "deploy": "npx hardhat run scripts/deploy.ts --network localhost"
   },

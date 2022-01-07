@@ -27,7 +27,7 @@ const rewardAddresses: Dict<string> = {
 };
 
 const tokenAddresses: Dict<string> = {
-  Local: "0xaba91fa7b4d090be80c4108e925628106e9be49e", //contractAddress.Token,
+  Local: contractAddress.Token,
   Test: "0xA761036cA1f3e66b178aE20d1C2bdE05b7A9BB35",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
