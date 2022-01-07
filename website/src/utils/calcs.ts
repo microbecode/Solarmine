@@ -47,8 +47,13 @@ export const calcFullDistribution = async (
   totalRewards: BigNumber,
   blacklist: ContractAddress[]
 ): Promise<SendParams> => {
+  console.log("starting");
   const supply = BigNumber.from(await contract.totalSupply());
-  const holders = (await contract.getHolders()) as string[];
+  console.log("supply", supply);
+  const origHolders = await contract.getPagedHolders(100, 0);
+  console.log("orig", origHolders);
+  const holders = origHolders as string[];
+  console.log("got holders", holders.length);
   let adjustedSupply: BigNumber = supply;
   let adjustedHolders: string[] = holders;
 

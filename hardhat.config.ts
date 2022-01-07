@@ -8,12 +8,11 @@ dotenv.config();
 
 const privKeyTestnet = process.env.TESTNET_PRIVATE_KEY;
 const providerTestnet = process.env.TESTNET_PROVIDER_URL;
-//const providerMainnet = process.env.PROVIDER_MAINNET;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-module.exports = {
+const settings = {
   solidity: "0.8.0",
   networks: {
     hardhat: {
@@ -37,3 +36,4 @@ module.exports = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   }, */
 };
+module.exports = settings;

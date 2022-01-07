@@ -27,7 +27,7 @@ const rewardAddresses: Dict<string> = {
 };
 
 const tokenAddresses: Dict<string> = {
-  Local: contractAddress.Token,
+  Local: "0xaba91fa7b4d090be80c4108e925628106e9be49e", //contractAddress.Token,
   Test: "0xA761036cA1f3e66b178aE20d1C2bdE05b7A9BB35",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
@@ -128,6 +128,7 @@ export function UI(props: Props) {
         .div(amountDecimalRounder);
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
+
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
       console.log("calculated full", fullData);
 
