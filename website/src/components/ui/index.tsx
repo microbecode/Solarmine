@@ -124,8 +124,8 @@ export function UI(props: Props) {
       let num = +assetAmount;
       num = num * amountDecimalRounder;
       var big = BigNumber.from(num.toString())
-        .div(amountDecimalRounder)
-        .mul(ethers.utils.parseUnits("1", 18));
+        .mul(ethers.utils.parseUnits("1", 18))
+        .div(amountDecimalRounder);
 
       const contract = new ethers.Contract(usedToken, Token.abi, provider);
       const fullData = await calcFullDistribution(contract, big, usedBlacklist);
