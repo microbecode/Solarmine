@@ -1,19 +1,19 @@
 import { BigNumber, ethers } from "ethers";
-import { ContractAddress, Env, SendParams } from "../components/types";
+import { ContractAddress, Env, SendBatch } from "../components/types";
 
 // Split the reward list into chunks
 export const splitDistribution = (
-  params: SendParams,
+  params: SendBatch,
   chunkSize: number
-): SendParams[] => {
+): SendBatch[] => {
   if (params.addresses.length != params.amounts.length) {
     throw "internal error";
   }
 
-  const list: SendParams[] = [];
+  const list: SendBatch[] = [];
 
   let currItemTotalAmount: BigNumber = BigNumber.from("0");
-  let currItem: SendParams = {
+  let currItem: SendBatch = {
     addresses: [],
     amounts: [],
     totalAmount: currItemTotalAmount,
@@ -51,7 +51,7 @@ export const calcFullDistribution = async (
     holderBalanceAmount: number,
     total: number
   ) => void
-): Promise<SendParams> => {
+): Promise<SendBatch> => {
   console.log("starting");
   const supply = BigNumber.from(await contract.totalSupply());
   console.log("supply", supply);
@@ -97,7 +97,7 @@ export const calcFullDistribution = async (
     amounts.push(rewardAmount);
   }
 
-  const ret: SendParams = {
+  const ret: SendBatch = {
     addresses: addresses,
     amounts: amounts,
     totalAmount: totalRewards,
@@ -114,13 +114,14 @@ const getHolders = async (
     total: number
   ) => void
 ): Promise<string[]> => {
-  const batchSize = 50;
+  const batchSize = 3;
   const total = await contract.getHolderAmount();
   let allHolders: string[] = [];
 
-  const batches = 15; //Math.ceil(total / batchSize);
+  const batches = Math.ceil(total / batchSize);
   for (let i = 0; i < batches; i++) {
     const offset = i * batchSize;
+    //console.log('batch', i, offset)
     const batchHolders = (await contract.getPagedHolders(
       batchSize,
       offset

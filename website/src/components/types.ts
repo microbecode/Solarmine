@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-export interface SendParams {
+export interface SendBatch {
   addresses: string[];
   amounts: BigNumber[];
   totalAmount: BigNumber;
@@ -8,7 +8,7 @@ export interface SendParams {
 
 export interface SignedParams {
   signedMsg: string;
-  originalMsg: SendParams;
+  originalMsg: SendBatch;
 }
 
 export enum Env {

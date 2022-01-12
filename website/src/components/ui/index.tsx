@@ -3,11 +3,10 @@ import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
-import { ContractAddress, SignedParams } from "../types";
+import { ContractAddress, SendBatch, SignedParams } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
-import { SendParams } from "../types";
 
 const isTest = true;
 const batchSize = 3;
@@ -27,7 +26,7 @@ const rewardAddresses: Dict<string> = {
 };
 
 const tokenAddresses: Dict<string> = {
-  Local: "0xaba91fa7b4d090be80c4108e925628106e9be49e", //contractAddress.Token,
+  Local: contractAddress.Token,
   Test: "0xA761036cA1f3e66b178aE20d1C2bdE05b7A9BB35",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
@@ -87,6 +86,8 @@ export function UI(props: Props) {
   //const [weiAmount, setWeiAmount] = useState<string>("0");
   const [simulateOnly, setSimulateOnly] = useState<boolean>(true);
   const [resultText, setResultText] = useState<string[]>([]);
+  const [sendBatches, setSendBatches] = useState<SendBatch[]>([]);
+  const [nextBatchSendIndex, setNextBatchSendIndex] = useState<number>(0);
 
   const amountDecimalRounder = 100000;
   function isMyNumeric(n: string) {
@@ -131,7 +132,7 @@ export function UI(props: Props) {
   const confirmSend = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-    const getSplits = async (): Promise<SendParams[]> => {
+    const getSplits = async (): Promise<SendBatch[]> => {
       let num = +assetAmount;
       num = num * amountDecimalRounder;
       var big = BigNumber.from(num.toString())
@@ -152,28 +153,13 @@ export function UI(props: Props) {
       return splitData;
     };
 
-    const getDisplayForSplits = (splits: SendParams[]): string[] => {
-      let textLines: string[] = [];
-      splits.forEach((split, i) => {
-        const length = split.addresses.length;
-        const totalAmount = split.amounts.reduce((main, curr) => {
-          return main.add(curr);
-        });
-        const totalStr = ethers.utils.formatUnits(totalAmount, 18);
-        textLines.push(
-          `Batch number ${
-            i + 1
-          } has ${length} users with total reward ${totalStr} BNB`
-        );
-      });
-      return textLines;
-    };
     if (isMyNumeric(assetAmount)) {
       if (simulateOnly) {
-        const splitData = await getSplits();
-        console.log("got splits", splitData);
-        const res = getDisplayForSplits(splitData);
-        setResultText(res);
+        const batchData = await getSplits();
+        setSendBatches(batchData);
+        console.log("got splits", batchData);
+        //const res = getDisplayForSplits(splitData);
+        //setResultText(res);
       } else if (
         window.confirm(
           "Are you sure you want to distribute " + assetAmount + " BNB?"
@@ -219,6 +205,17 @@ export function UI(props: Props) {
     }
   };
 
+  const getDisplayForBatch = (batch: SendBatch, index: number): string => {
+    const length = batch.addresses.length;
+    const totalAmount = batch.amounts.reduce((main, curr) => {
+      return main.add(curr);
+    });
+    const totalStr = ethers.utils.formatUnits(totalAmount, 18);
+    return `Batch number ${
+      index + 1
+    } has ${length} users with total reward ${totalStr} BNB`;
+  };
+
   return (
     <div className="create-container pt-5 pb-0 px-5" id="what">
       <div>Used environment: {usedEnv}</div>
@@ -253,10 +250,22 @@ export function UI(props: Props) {
       </div>
       <div>Results</div>
       <div>
-        {resultText.map((text, i) => {
+        {sendBatches.map((batch, i) => {
+          const text = getDisplayForBatch(batch, i);
+          const btnText = "Send batch " + i;
           return (
             <div key={i}>
-              <input type="text" disabled={true} value={text}></input>
+              <input
+                type="text"
+                disabled={true}
+                value={text}
+                style={{ width: "800px" }}
+              ></input>
+              <input
+                type="button"
+                value={btnText}
+                disabled={nextBatchSendIndex !== i}
+              ></input>
             </div>
           );
         })}
