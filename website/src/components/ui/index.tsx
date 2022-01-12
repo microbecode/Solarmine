@@ -83,8 +83,6 @@ declare var window: any; // to fix 'window.ethereum' errors
 export function UI(props: Props) {
   const [usedChainName, setUsedChainName] = useState<string>("");
   const [assetAmount, setAssetAmount] = useState<string>("0");
-  //const [weiAmount, setWeiAmount] = useState<string>("0");
-  const [simulateOnly, setSimulateOnly] = useState<boolean>(true);
   const [resultText, setResultText] = useState<string[]>([]);
   const [sendBatches, setSendBatches] = useState<SendBatch[]>([]);
   const [nextBatchSendIndex, setNextBatchSendIndex] = useState<number>(0);
@@ -188,6 +186,7 @@ export function UI(props: Props) {
     console.log("got res", res);
     const final = await res.wait();
     console.log("got wait", final);
+    setNextBatchSendIndex(nextBatchSendIndex + 1);
   };
 
   return (
@@ -212,14 +211,6 @@ export function UI(props: Props) {
         ></input>
       </div>
       <div>
-        Simulate only:{" "}
-        <input
-          type="checkbox"
-          checked={simulateOnly}
-          onChange={() => setSimulateOnly(!simulateOnly)}
-        ></input>
-      </div>
-      <div>
         <input
           type="button"
           onClick={calculateBatches}
@@ -239,7 +230,12 @@ export function UI(props: Props) {
       <div>
         {sendBatches.map((batch, i) => {
           const text = getDisplayForBatch(batch, i);
-          const btnText = "Send batch " + i;
+          let btnText = "Send batch " + (i + 1);
+          let btnDisabled = false;
+          if (nextBatchSendIndex > i) {
+            btnText = "Sent succesfully";
+            btnDisabled = true;
+          }
           return (
             <div key={i}>
               <input
@@ -251,7 +247,7 @@ export function UI(props: Props) {
               <input
                 type="button"
                 value={btnText}
-                disabled={nextBatchSendIndex !== i}
+                disabled={nextBatchSendIndex !== i || btnDisabled}
                 onClick={() => sendBatch(i)}
               ></input>
             </div>
