@@ -77,7 +77,11 @@ export const calcFullDistribution = async (
     const balance = await contract.balanceOf(adjustedHolders[i]);
 
     if (updateHoldersReceived) {
-      updateHoldersReceived(adjustedHolders.length, i, adjustedHolders.length);
+      updateHoldersReceived(
+        adjustedHolders.length,
+        i + 1,
+        adjustedHolders.length
+      );
     }
 
     const rewardAmount: BigNumber = balance

@@ -129,9 +129,9 @@ export function UI(props: Props) {
     }
   }, []); */
 
-  const confirmSend = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
 
+  const calculateBatches = async () => {
     const getSplits = async (): Promise<SendBatch[]> => {
       let num = +assetAmount;
       num = num * amountDecimalRounder;
@@ -154,52 +154,11 @@ export function UI(props: Props) {
     };
 
     if (isMyNumeric(assetAmount)) {
-      if (simulateOnly) {
-        const batchData = await getSplits();
-        setSendBatches(batchData);
-        console.log("got splits", batchData);
-        //const res = getDisplayForSplits(splitData);
-        //setResultText(res);
-      } else if (
-        window.confirm(
-          "Are you sure you want to distribute " + assetAmount + " BNB?"
-        )
-      ) {
-        console.log("yes");
-        const splitData = await getSplits();
-        splitData.forEach(async (sendItem) => {
-          const contract = new ethers.Contract(
-            usedRewards,
-            Rewards.abi,
-            provider.getSigner()
-          );
-          const res = await contract.distribute(
-            sendItem.addresses,
-            sendItem.amounts,
-            { value: sendItem.totalAmount }
-          );
-          await res.wait();
-          /*         const signed = await provider
-            .getSigner()
-            .signMessage(JSON.stringify(sendItem));
-          const sendData: SignedParams = {
-            originalMsg: sendItem,
-            signedMsg: signed,
-          };
-          const toSend = JSON.stringify(sendData); */
-          /*         axios({
-            method: "post",
-            url: "/.netlify/functions/runTx",
-            data: toSend,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-  
-          const res = await axios.post("/.netlify/functions/runTx", toSend);
-          console.log("send result", res, toSend); */
-        });
-      }
+      const batchData = await getSplits();
+      setSendBatches(batchData);
+      console.log("got batches", batchData);
+      //const res = getDisplayForSplits(splitData);
+      //setResultText(res);
     } else {
       alert("Fix your amount");
     }
@@ -214,6 +173,21 @@ export function UI(props: Props) {
     return `Batch number ${
       index + 1
     } has ${length} users with total reward ${totalStr} BNB`;
+  };
+
+  const sendBatch = async (index: number) => {
+    const contract = new ethers.Contract(
+      usedRewards,
+      Rewards.abi,
+      provider.getSigner()
+    );
+    const batch = sendBatches[index];
+    const res = await contract.distribute(batch.addresses, batch.amounts, {
+      value: batch.totalAmount,
+    });
+    console.log("got res", res);
+    const final = await res.wait();
+    console.log("got wait", final);
   };
 
   return (
@@ -246,9 +220,22 @@ export function UI(props: Props) {
         ></input>
       </div>
       <div>
-        <input type="button" onClick={confirmSend} value="Send"></input>
+        <input
+          type="button"
+          onClick={calculateBatches}
+          value="Calculate batches"
+        ></input>
       </div>
-      <div>Results</div>
+      <div>
+        Progress:{" "}
+        <input
+          type="text"
+          disabled={true}
+          value={resultText.join(", ")}
+          style={{ width: "800px" }}
+        ></input>
+      </div>
+      <div>Batches </div>
       <div>
         {sendBatches.map((batch, i) => {
           const text = getDisplayForBatch(batch, i);
@@ -265,6 +252,7 @@ export function UI(props: Props) {
                 type="button"
                 value={btnText}
                 disabled={nextBatchSendIndex !== i}
+                onClick={() => sendBatch(i)}
               ></input>
             </div>
           );
