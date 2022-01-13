@@ -173,6 +173,7 @@ export function UI(props: Props) {
     } has ${length} users with total reward ${totalStr} BNB`;
   };
 
+
   const sendBatch = async (index: number) => {
     const contract = new ethers.Contract(
       usedRewards,
@@ -180,13 +181,37 @@ export function UI(props: Props) {
       provider.getSigner()
     );
     const batch = sendBatches[index];
-    const res = await contract.distribute(batch.addresses, batch.amounts, {
-      value: batch.totalAmount,
-    });
+    const res: ethers.providers.TransactionResponse = await contract.distribute(
+      batch.addresses,
+      batch.amounts,
+      {
+        value: batch.totalAmount,
+      }
+    );
+
     console.log("got res", res);
     const final = await res.wait();
+
+    const copyBatch = { ...batch };
+    copyBatch.transactionHash = final.transactionHash;
+    const copyList = [...sendBatches];
+    copyList[index] = copyBatch;
+    setSendBatches(copyList);
+
     console.log("got wait", final);
     setNextBatchSendIndex(nextBatchSendIndex + 1);
+  };
+
+  const exportData = () => {
+    const json = JSON.stringify(sendBatches);
+    const blob = new Blob([json]);
+    const element = document.createElement("a");
+    element.href = URL.createObjectURL(blob);
+    const filename =
+      "solarmine-reward-" + Math.floor(new Date().getTime() / 1000) + ".json";
+    element.download = filename;
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
   };
 
   return (
@@ -226,6 +251,12 @@ export function UI(props: Props) {
           style={{ width: "800px" }}
         ></input>
       </div>
+      {sendBatches && sendBatches.length > 0 && (
+        <div>
+          <input type="button" value="Export data" onClick={exportData}></input>
+        </div>
+      )}
+      <div>Export data: </div>
       <div>Batches </div>
       <div>
         {sendBatches.map((batch, i) => {

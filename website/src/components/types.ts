@@ -4,6 +4,7 @@ export interface SendBatch {
   addresses: string[];
   amounts: BigNumber[];
   totalAmount: BigNumber;
+  transactionHash?: string;
 }
 
 export interface SignedParams {
