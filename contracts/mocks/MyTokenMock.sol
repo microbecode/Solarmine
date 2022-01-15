@@ -13,13 +13,14 @@ contract MyTokenMock is MyToken {
 
     function mint(address account, uint256 amount) public {
         _mint(account, amount);
+        _afterTokenTransfer(address(0x0), account, amount);
     }
 
     function mintMany(address[] memory accounts, uint256[] memory amounts)
         public
     {
         for (uint256 i = 0; i < accounts.length; i++) {
-            _mint(accounts[i], amounts[i]);
+            mint(accounts[i], amounts[i]);
         }
     }
 

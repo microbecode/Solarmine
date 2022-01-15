@@ -42,25 +42,28 @@ const giveTokens = async (
     if (receivers.length % mintBatch == 0 && receivers.length > 0) {
       const addrs = receivers.map((r) => r.address);
       const amounts = receivers.map((r) => r.amount);
-      console.log("minting ", i);
+      console.log("minting... ", i + 1);
       await token.mintMany(addrs, amounts);
       receivers = [];
     }
   }
 
-  await token.mintMany(
-    receivers.map((r) => r.address),
-    receivers.map((r) => r.amount)
-  );
-
-  for (let i = 0; i < receivers.length; i++) {}
+  if (receivers.length > 0) {
+    await token.mintMany(
+      receivers.map((r) => r.address),
+      receivers.map((r) => r.amount)
+    );
+  }
 };
 
 async function main() {
-  const tokenSupply = BigNumber.from("0"); //BigNumber.from(10000).mul(BigNumber.from("10").pow("18"));
+  const mintableSupply = BigNumber.from(10000).mul(
+    BigNumber.from("10").pow("18")
+  );
+  const initialSupply = BigNumber.from(1).mul(BigNumber.from("10").pow("18"));
 
   const tokenFact = await ethers.getContractFactory("MyTokenMock");
-  const token = await tokenFact.deploy(tokenSupply);
+  const token = await tokenFact.deploy(initialSupply);
   await token.deployed();
 
   const rewardsFact = await ethers.getContractFactory(useRewards);
@@ -74,11 +77,13 @@ async function main() {
     rewards.address
   );
 
-  await giveTokens(token, 105, tokenSupply);
-
   await saveFrontendFiles(token.address, rewards.address);
 
-  await verifyContracts(token.address, tokenSupply, rewards.address);
+  await verifyContracts(token.address, initialSupply, rewards.address);
+
+  await giveTokens(token, 2000, mintableSupply);
+
+  console.log("All done");
 }
 
 async function saveFrontendFiles(tokenAddr: string, rewardAddr: string) {
@@ -141,7 +146,6 @@ const verifyContracts = async (
         constructorArguments: [],
       });
     } catch (ex: any) {
-      console.log("type", typeof ex);
       if (ex.toString().indexOf("Already Verified") == -1) {
         throw ex;
       }
