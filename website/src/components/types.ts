@@ -7,6 +7,13 @@ export interface SendBatch {
   transactionHash?: string;
 }
 
+export interface HumanizedSendBatch {
+  addresses: string[];
+  amounts: string[];
+  totalAmount: string;
+  transactionHash?: string;
+}
+
 export interface SignedParams {
   signedMsg: string;
   originalMsg: SendBatch;

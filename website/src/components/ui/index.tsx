@@ -3,7 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
-import { ContractAddress, SendBatch, SignedParams } from "../types";
+import { ContractAddress, SendBatch, HumanizedSendBatch } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
@@ -205,7 +205,25 @@ export function UI(props: Props) {
   };
 
   const exportData = () => {
-    const json = JSON.stringify(sendBatches);
+    const humanizeData = (batches: SendBatch[]): HumanizedSendBatch[] => {
+      const humanized: HumanizedSendBatch[] = [];
+      for (let i = 0; i < batches.length; i++) {
+        const amounts = batches[i].amounts.map((a) => a.toString());
+        const totalAmount = batches[i].totalAmount.toString();
+
+        const hum: HumanizedSendBatch = {
+          addresses: batches[i].addresses,
+          amounts: amounts,
+          totalAmount: totalAmount,
+          transactionHash: batches[i].transactionHash,
+        };
+        humanized.push(hum);
+      }
+      return humanized;
+    };
+
+    const json = JSON.stringify(humanizeData(sendBatches));
+    console.log("JSON", json);
     const blob = new Blob([json]);
     const element = document.createElement("a");
     element.href = URL.createObjectURL(blob);
