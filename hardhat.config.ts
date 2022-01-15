@@ -2,6 +2,7 @@
 
 import "@nomiclabs/hardhat-waffle";
 import dotenv from "dotenv";
+import "@nomiclabs/hardhat-etherscan";
 dotenv.config();
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -37,7 +38,7 @@ module.exports = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   }, */
-  /*   etherscan: {
+  etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-  }, */
+  },
 };

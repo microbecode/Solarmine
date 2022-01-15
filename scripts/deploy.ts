@@ -1,6 +1,7 @@
-import { artifacts, ethers } from "hardhat";
+import { artifacts, ethers, network } from "hardhat";
 import * as fs from "fs";
 import { BigNumber, Contract } from "ethers";
+const hre = require("hardhat");
 
 const useReverterRewards = false;
 const useRewards = useReverterRewards
@@ -56,10 +57,10 @@ const giveTokens = async (
 };
 
 async function main() {
-  const tokenSupply = BigNumber.from(10000).mul(BigNumber.from("10").pow("18"));
+  const tokenSupply = BigNumber.from("0"); //BigNumber.from(10000).mul(BigNumber.from("10").pow("18"));
 
   const tokenFact = await ethers.getContractFactory("MyTokenMock");
-  const token = await tokenFact.deploy(BigNumber.from("0"));
+  const token = await tokenFact.deploy(tokenSupply);
   await token.deployed();
 
   const rewardsFact = await ethers.getContractFactory(useRewards);
@@ -76,6 +77,8 @@ async function main() {
   await giveTokens(token, 105, tokenSupply);
 
   await saveFrontendFiles(token.address, rewards.address);
+
+  await verifyContracts(token.address, tokenSupply, rewards.address);
 }
 
 async function saveFrontendFiles(tokenAddr: string, rewardAddr: string) {
@@ -110,6 +113,45 @@ async function saveFrontendFiles(tokenAddr: string, rewardAddr: string) {
     JSON.stringify(RewardsArtifact, null, 2)
   );
 }
+
+const verifyContracts = async (
+  tokenAddr: string,
+  tokenArgs: BigNumber,
+  rewardAddr: string
+) => {
+  if (network.name !== "hardhat" && network.name !== "localhost") {
+    console.log("Waiting for the contracts to be distributed in BSCscan...");
+
+    await delay(30000);
+
+    try {
+      await hre.run("verify:verify", {
+        address: tokenAddr,
+        constructorArguments: [tokenArgs],
+      });
+    } catch (ex: any) {
+      if (ex.toString().indexOf("Already Verified") == -1) {
+        throw ex;
+      }
+    }
+
+    try {
+      await hre.run("verify:verify", {
+        address: rewardAddr,
+        constructorArguments: [],
+      });
+    } catch (ex: any) {
+      console.log("type", typeof ex);
+      if (ex.toString().indexOf("Already Verified") == -1) {
+        throw ex;
+      }
+    }
+
+    console.log("Verification done");
+  }
+};
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

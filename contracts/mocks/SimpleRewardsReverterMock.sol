@@ -6,7 +6,7 @@ import "../SimpleRewards.sol";
 contract SimpleRewardsReverterMock is SimpleRewards {
     uint256 numOfDistribute;
 
-    function distribute(address[] memory receivers, uint256[] memory values)
+    function distribute(address[] memory, uint256[] memory)
         public
         payable
         override
