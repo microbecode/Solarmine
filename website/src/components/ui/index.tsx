@@ -222,13 +222,25 @@ export function UI(props: Props) {
       return humanized;
     };
 
+    const getNowStr = (): string => {
+      const now = new Date();
+      const humanizedDate =
+        "" +
+        now.getUTCFullYear() +
+        now.getUTCMonth() +
+        now.getUTCDate() +
+        now.getUTCHours() +
+        now.getUTCMinutes();
+
+      return humanizedDate;
+    };
+
     const json = JSON.stringify(humanizeData(sendBatches));
-    console.log("JSON", json);
     const blob = new Blob([json]);
     const element = document.createElement("a");
     element.href = URL.createObjectURL(blob);
-    const filename =
-      "solarmine-reward-" + Math.floor(new Date().getTime() / 1000) + ".json";
+
+    const filename = "solarmine-reward-" + getNowStr() + ".json";
     element.download = filename;
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
