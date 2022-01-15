@@ -7,23 +7,59 @@ const useRewards = useReverterRewards
   ? "SimpleRewardsReverterMock" // Used for simulating failed batches
   : "SimpleRewards";
 
+const mintBatch = 50;
+
+interface Holder {
+  address: string;
+  amount: BigNumber;
+}
+
 const giveTokens = async (
   token: Contract,
   holders: number,
   totalAmount: BigNumber
 ) => {
   let prefixNum = ethers.BigNumber.from("10").pow(38);
-  for (let i = 0; i < holders; i++) {
-    const addr = "0x5" + prefixNum.add(i).toString();
-    await token.transfer(addr, totalAmount.div(holders));
+
+  let receivers: Holder[] = [];
+
+  let divider = 100;
+  if (holders > 1000) {
+    divider = 1000;
   }
+  let shared = BigNumber.from("0");
+  for (let i = 0; i < holders; i++) {
+    const addr = "0x6" + prefixNum.add(i).toString();
+    const percent = totalAmount.sub(shared).div(divider);
+    shared = shared.add(percent);
+    const holder: Holder = {
+      address: addr,
+      amount: percent,
+    };
+    receivers.push(holder);
+
+    if (receivers.length % mintBatch == 0 && receivers.length > 0) {
+      const addrs = receivers.map((r) => r.address);
+      const amounts = receivers.map((r) => r.amount);
+      console.log("minting ", i);
+      await token.mintMany(addrs, amounts);
+      receivers = [];
+    }
+  }
+
+  await token.mintMany(
+    receivers.map((r) => r.address),
+    receivers.map((r) => r.amount)
+  );
+
+  for (let i = 0; i < receivers.length; i++) {}
 };
 
 async function main() {
   const tokenSupply = BigNumber.from(10000).mul(BigNumber.from("10").pow("18"));
 
   const tokenFact = await ethers.getContractFactory("MyTokenMock");
-  const token = await tokenFact.deploy(tokenSupply);
+  const token = await tokenFact.deploy(BigNumber.from("0"));
   await token.deployed();
 
   const rewardsFact = await ethers.getContractFactory(useRewards);
@@ -37,7 +73,7 @@ async function main() {
     rewards.address
   );
 
-  await giveTokens(token, 10, tokenSupply);
+  await giveTokens(token, 105, tokenSupply);
 
   await saveFrontendFiles(token.address, rewards.address);
 }

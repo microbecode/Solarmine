@@ -15,6 +15,14 @@ contract MyTokenMock is MyToken {
         _mint(account, amount);
     }
 
+    function mintMany(address[] memory accounts, uint256[] memory amounts)
+        public
+    {
+        for (uint256 i = 0; i < accounts.length; i++) {
+            _mint(accounts[i], amounts[i]);
+        }
+    }
+
     function burn(address account, uint256 amount) public {
         _burn(account, amount);
     }
