@@ -53,19 +53,22 @@ export const calcFullDistribution = async (
   ) => void
 ): Promise<SendBatch> => {
   console.log("starting");
-  const supply = BigNumber.from(await contract.totalSupply());
-  console.log("supply", supply);
 
   const holders = await getHolders(contract, updateHoldersReceived);
   console.log("got holders", holders.length);
-  let adjustedSupply: BigNumber = supply;
   let adjustedHolders: string[] = holders;
+  let totalBalance: BigNumber = BigNumber.from("0");
 
   for (let i = 0; i < blacklist.length; i++) {
     const balance = await contract.balanceOf(blacklist[i].address);
-    adjustedSupply = adjustedSupply.sub(balance);
     adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i].address);
   }
+
+  for (let i = 0; i < adjustedHolders.length; i++) {
+    const balance = await contract.balanceOf(adjustedHolders[i]);
+    totalBalance = totalBalance.add(balance);
+  }
+  console.log("using total balance " + totalBalance.toString());
 
   // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
@@ -86,7 +89,7 @@ export const calcFullDistribution = async (
 
     const rewardAmount: BigNumber = balance
       .mul(tempMultiplier)
-      .div(adjustedSupply)
+      .div(totalBalance)
       .mul(totalRewards)
       .div(tempMultiplier);
 

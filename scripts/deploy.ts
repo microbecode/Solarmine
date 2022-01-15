@@ -2,6 +2,11 @@ import { artifacts, ethers } from "hardhat";
 import * as fs from "fs";
 import { BigNumber, Contract } from "ethers";
 
+const useReverterRewards = false;
+const useRewards = useReverterRewards
+  ? "SimpleRewardsReverterMock" // Used for simulating failed batches
+  : "SimpleRewards";
+
 const giveTokens = async (
   token: Contract,
   holders: number,
@@ -21,7 +26,7 @@ async function main() {
   const token = await tokenFact.deploy(tokenSupply);
   await token.deployed();
 
-  const rewardsFact = await ethers.getContractFactory("SimpleRewards");
+  const rewardsFact = await ethers.getContractFactory(useRewards);
   const rewards = await rewardsFact.deploy();
   await rewards.deployed();
 

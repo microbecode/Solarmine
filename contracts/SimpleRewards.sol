@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-// TODO: cleanup the code
-contract SimpleRewards is Ownable {
+contract SimpleRewards {
     event ReceiverRefusedReward(address indexed);
 
     function distribute(address[] memory receivers, uint256[] memory values)
         public
         payable
+        virtual
     {
         for (uint256 i = 0; i < receivers.length; i++) {
             (bool success, ) = receivers[i].call{value: values[i], gas: 3000}(

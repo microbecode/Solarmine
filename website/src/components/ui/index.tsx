@@ -34,7 +34,7 @@ const tokenAddresses: Dict<string> = {
 const blacklistedAddresses: Dict<ContractAddress[]> = {
   Local: [
     {
-      address: "0x000000000000000000000000000000000000abcd",
+      address: "0x5100000000000000000000000000000000000008",
       title: "Some address",
     },
     {
@@ -173,7 +173,6 @@ export function UI(props: Props) {
     } has ${length} users with total reward ${totalStr} BNB`;
   };
 
-
   const sendBatch = async (index: number) => {
     const contract = new ethers.Contract(
       usedRewards,
@@ -181,25 +180,28 @@ export function UI(props: Props) {
       provider.getSigner()
     );
     const batch = sendBatches[index];
-    const res: ethers.providers.TransactionResponse = await contract.distribute(
-      batch.addresses,
-      batch.amounts,
-      {
-        value: batch.totalAmount,
-      }
-    );
+    try {
+      const res: ethers.providers.TransactionResponse =
+        await contract.distribute(batch.addresses, batch.amounts, {
+          value: batch.totalAmount,
+        });
 
-    console.log("got res", res);
-    const final = await res.wait();
+      console.log("got res", res);
+      const final = await res.wait();
 
-    const copyBatch = { ...batch };
-    copyBatch.transactionHash = final.transactionHash;
-    const copyList = [...sendBatches];
-    copyList[index] = copyBatch;
-    setSendBatches(copyList);
+      const copyBatch = { ...batch };
+      copyBatch.transactionHash = final.transactionHash;
+      const copyList = [...sendBatches];
+      copyList[index] = copyBatch;
+      setSendBatches(copyList);
 
-    console.log("got wait", final);
-    setNextBatchSendIndex(nextBatchSendIndex + 1);
+      console.log("got wait", final);
+      setNextBatchSendIndex(nextBatchSendIndex + 1);
+    } catch (ex: any) {
+      console.error("exxx", ex);
+      alert("Batch failed: " + ex?.data?.message);
+      return;
+    }
   };
 
   const exportData = () => {
@@ -253,10 +255,13 @@ export function UI(props: Props) {
       </div>
       {sendBatches && sendBatches.length > 0 && (
         <div>
-          <input type="button" value="Export data" onClick={exportData}></input>
+          <input
+            type="button"
+            value="Download data file"
+            onClick={exportData}
+          ></input>
         </div>
       )}
-      <div>Export data: </div>
       <div>Batches </div>
       <div>
         {sendBatches.map((batch, i) => {
