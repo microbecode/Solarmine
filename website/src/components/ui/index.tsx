@@ -9,7 +9,7 @@ import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
 
 const isTest = true;
-const batchSize = 3;
+const batchSize = 50;
 
 enum Env {
   Local,

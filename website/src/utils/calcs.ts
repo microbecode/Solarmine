@@ -121,7 +121,7 @@ const getHolders = async (
     total: number
   ) => void
 ): Promise<string[]> => {
-  const batchSize = 3;
+  const batchSize = 50;
   const total = await contract.getHolderAmount();
   let allHolders: string[] = [];
 
