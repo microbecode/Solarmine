@@ -44,7 +44,7 @@ const blacklistedAddresses: Dict<ContractAddress[]> = {
   ],
   Test: [
     {
-      address: "0x610000000000000000000000000000000000008",
+      address: "0x6100000000000000000000000000000000000008",
       title: "Some address",
     },
     {
