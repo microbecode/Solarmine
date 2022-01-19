@@ -60,12 +60,25 @@ export const calcFullDistribution = async (
   let totalBalance: BigNumber = BigNumber.from("0");
 
   for (let i = 0; i < blacklist.length; i++) {
-    const balance = await contract.balanceOf(blacklist[i].address);
+    //const balance = await contract.balanceOf(blacklist[i].address);
     adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i].address);
   }
+  console.log("now holders", adjustedHolders.length);
+
+  var balances: BigNumber[] = [];
 
   for (let i = 0; i < adjustedHolders.length; i++) {
     const balance = await contract.balanceOf(adjustedHolders[i]);
+    balances.push(balance);
+
+    if (updateHoldersReceived) {
+      updateHoldersReceived(
+        adjustedHolders.length,
+        i + 1,
+        adjustedHolders.length
+      );
+    }
+
     totalBalance = totalBalance.add(balance);
   }
   console.log("using total balance " + totalBalance.toString());
@@ -77,15 +90,7 @@ export const calcFullDistribution = async (
   const addresses: string[] = [];
 
   for (let i = 0; i < adjustedHolders.length; i++) {
-    const balance = await contract.balanceOf(adjustedHolders[i]);
-
-    if (updateHoldersReceived) {
-      updateHoldersReceived(
-        adjustedHolders.length,
-        i + 1,
-        adjustedHolders.length
-      );
-    }
+    const balance = balances[i];
 
     const rewardAmount: BigNumber = balance
       .mul(tempMultiplier)
