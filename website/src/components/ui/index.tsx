@@ -34,7 +34,7 @@ const tokenAddresses: Dict<string> = {
 const blacklistedAddresses: Dict<ContractAddress[]> = {
   Local: [
     {
-      address: "0x5100000000000000000000000000000000000008",
+      address: "0x6100000000000000000000000000000000000008",
       title: "Some address",
     },
     {
@@ -44,7 +44,7 @@ const blacklistedAddresses: Dict<ContractAddress[]> = {
   ],
   Test: [
     {
-      address: "0x000000000000000000000000000000000000abcd",
+      address: "0x610000000000000000000000000000000000008",
       title: "Some address",
     },
     {
@@ -102,11 +102,15 @@ export function UI(props: Props) {
   const updateHoldersReceived = (
     amount: number,
     holderBalanceAmount: number,
-    total: number
+    total: number,
+    totalHoldersToCheck: number
   ) => {
     setResultText([
-      "Received holders: " + amount + " / " + total,
-      "Received holder balances: " + holderBalanceAmount + " / " + total,
+      "Received all holders: " + amount + " / " + total,
+      "Received non-blacklisted holder balances: " +
+        holderBalanceAmount +
+        " / " +
+        totalHoldersToCheck,
     ]);
   };
 

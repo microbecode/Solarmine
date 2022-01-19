@@ -49,33 +49,42 @@ export const calcFullDistribution = async (
   updateHoldersReceived: (
     holderAmount: number,
     holderBalanceAmount: number,
-    total: number
+    total: number,
+    totalHoldersToCheck: number
   ) => void
 ): Promise<SendBatch> => {
   console.log("starting");
 
   const holders = await getHolders(contract, updateHoldersReceived);
-  console.log("got holders", holders.length);
-  let adjustedHolders: string[] = holders;
+  console.log("got holders", holders.length, blacklist.length);
+  let afterBlacklistRemovalHolders: string[] = [...holders];
   let totalBalance: BigNumber = BigNumber.from("0");
 
   for (let i = 0; i < blacklist.length; i++) {
     //const balance = await contract.balanceOf(blacklist[i].address);
-    adjustedHolders = adjustedHolders.filter((h) => h !== blacklist[i].address);
+    console.log("blacklisted", blacklist[i].address);
+    afterBlacklistRemovalHolders = afterBlacklistRemovalHolders.filter(
+      (h) => h !== blacklist[i].address
+    );
   }
-  console.log("now holders", adjustedHolders.length);
+  console.log(
+    "now holders",
+    afterBlacklistRemovalHolders.length,
+    blacklist.length
+  );
 
   var balances: BigNumber[] = [];
 
-  for (let i = 0; i < adjustedHolders.length; i++) {
-    const balance = await contract.balanceOf(adjustedHolders[i]);
+  for (let i = 0; i < afterBlacklistRemovalHolders.length; i++) {
+    const balance = await contract.balanceOf(afterBlacklistRemovalHolders[i]);
     balances.push(balance);
 
     if (updateHoldersReceived) {
       updateHoldersReceived(
-        adjustedHolders.length,
+        holders.length,
         i + 1,
-        adjustedHolders.length
+        holders.length,
+        afterBlacklistRemovalHolders.length
       );
     }
 
@@ -89,7 +98,7 @@ export const calcFullDistribution = async (
   const amounts: BigNumber[] = [];
   const addresses: string[] = [];
 
-  for (let i = 0; i < adjustedHolders.length; i++) {
+  for (let i = 0; i < afterBlacklistRemovalHolders.length; i++) {
     const balance = balances[i];
 
     const rewardAmount: BigNumber = balance
@@ -105,7 +114,7 @@ export const calcFullDistribution = async (
       rewardAmount.toString()
     ); */
 
-    addresses.push(adjustedHolders[i]);
+    addresses.push(afterBlacklistRemovalHolders[i]);
     amounts.push(rewardAmount);
   }
 
@@ -123,7 +132,8 @@ const getHolders = async (
   updateHoldersReceived: (
     holderAmount: number,
     holderBalanceAmount: number,
-    total: number
+    total: number,
+    totalHoldersToCheck: number
   ) => void
 ): Promise<string[]> => {
   const batchSize = 50;
@@ -141,7 +151,7 @@ const getHolders = async (
     allHolders = allHolders.concat(batchHolders);
     console.log("have holders: " + allHolders.length);
     if (updateHoldersReceived) {
-      updateHoldersReceived(allHolders.length, 0, total);
+      updateHoldersReceived(allHolders.length, 0, total, allHolders.length);
     }
   }
 
