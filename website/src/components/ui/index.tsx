@@ -93,6 +93,7 @@ export function UI(props: Props) {
   const [sendBatches, setSendBatches] = useState<SendBatch[]>([]);
   const [nextBatchSendIndex, setNextBatchSendIndex] = useState<number>(0);
   const [waitingForTx, setWaitingForTx] = useState<boolean>(false);
+  const [previousTxHash, setPreviousTxHash] = useState<string>("");
 
   const amountDecimalRounder = 100000;
   function isMyNumeric(n: string) {
@@ -196,8 +197,11 @@ export function UI(props: Props) {
         await contract.distribute(batch.addresses, batch.amounts, {
           value: batch.totalAmount,
         });
+
       setWaitingForTx(true);
+      setPreviousTxHash(res.hash);
       console.log("got res", res);
+
       const final = await res.wait();
 
       const copyBatch = { ...batch };
@@ -205,8 +209,10 @@ export function UI(props: Props) {
       const copyList = [...sendBatches];
       copyList[index] = copyBatch;
       setSendBatches(copyList);
+
       setWaitingForTx(false);
-      console.log("got wait", final);
+      console.log("got final", final);
+
       setNextBatchSendIndex(nextBatchSendIndex + 1);
     } catch (ex: any) {
       console.error("exxx", ex);
@@ -314,6 +320,7 @@ export function UI(props: Props) {
           ></input>
         </div>
       )}
+      <div>Previous tx hash: {previousTxHash}</div>
       <div>Batches </div>
       <div>
         {sendBatches.map((batch, i) => {
