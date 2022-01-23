@@ -9,6 +9,7 @@ const useRewards = useReverterRewards
   : "SimpleRewards";
 
 const mintBatch = 50;
+const holderAmount = 100;
 
 interface Holder {
   address: string;
@@ -81,7 +82,7 @@ async function main() {
 
   await verifyContracts(token.address, initialSupply, rewards.address);
 
-  await giveTokens(token, 2000, mintableSupply);
+  await giveTokens(token, holderAmount, mintableSupply);
 
   console.log("All done");
 }

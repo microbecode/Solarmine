@@ -7,11 +7,19 @@ export interface SendBatch {
   transactionHash?: string;
 }
 
+export interface ExportFile {
+  batches: HumanizedSendBatch[];
+}
+
 export interface HumanizedSendBatch {
-  addresses: string[];
-  amounts: string[];
   totalAmount: string;
   transactionHash?: string;
+  holders: HumanizedSendItem[];
+}
+
+export interface HumanizedSendItem {
+  address: string;
+  sentAmount: string;
 }
 
 export interface SignedParams {

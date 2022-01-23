@@ -3,7 +3,13 @@ import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
 import { calcFullDistribution, splitDistribution } from "../../utils/calcs";
-import { ContractAddress, SendBatch, HumanizedSendBatch } from "../types";
+import {
+  ContractAddress,
+  SendBatch,
+  HumanizedSendBatch,
+  ExportFile,
+  HumanizedSendItem,
+} from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
@@ -86,6 +92,7 @@ export function UI(props: Props) {
   const [resultText, setResultText] = useState<string[]>([]);
   const [sendBatches, setSendBatches] = useState<SendBatch[]>([]);
   const [nextBatchSendIndex, setNextBatchSendIndex] = useState<number>(0);
+  const [waitingForTx, setWaitingForTx] = useState<boolean>(false);
 
   const amountDecimalRounder = 100000;
   function isMyNumeric(n: string) {
@@ -189,7 +196,7 @@ export function UI(props: Props) {
         await contract.distribute(batch.addresses, batch.amounts, {
           value: batch.totalAmount,
         });
-
+      setWaitingForTx(true);
       console.log("got res", res);
       const final = await res.wait();
 
@@ -198,7 +205,7 @@ export function UI(props: Props) {
       const copyList = [...sendBatches];
       copyList[index] = copyBatch;
       setSendBatches(copyList);
-
+      setWaitingForTx(false);
       console.log("got wait", final);
       setNextBatchSendIndex(nextBatchSendIndex + 1);
     } catch (ex: any) {
@@ -209,21 +216,32 @@ export function UI(props: Props) {
   };
 
   const exportData = () => {
-    const humanizeData = (batches: SendBatch[]): HumanizedSendBatch[] => {
+    const humanizeData = (batches: SendBatch[]): ExportFile => {
       const humanized: HumanizedSendBatch[] = [];
       for (let i = 0; i < batches.length; i++) {
         const amounts = batches[i].amounts.map((a) => a.toString());
         const totalAmount = batches[i].totalAmount.toString();
 
+        var holders: HumanizedSendItem[] = [];
+        for (let a = 0; a < amounts.length; a++) {
+          var item: HumanizedSendItem = {
+            address: batches[i].addresses[a],
+            sentAmount: amounts[a],
+          };
+          holders.push(item);
+        }
+
         const hum: HumanizedSendBatch = {
-          addresses: batches[i].addresses,
-          amounts: amounts,
           totalAmount: totalAmount,
           transactionHash: batches[i].transactionHash,
+          holders: holders,
         };
         humanized.push(hum);
       }
-      return humanized;
+      var exp: ExportFile = {
+        batches: humanized,
+      };
+      return exp;
     };
 
     const getNowStr = (): string => {
@@ -304,6 +322,10 @@ export function UI(props: Props) {
           let btnDisabled = false;
           if (nextBatchSendIndex > i) {
             btnText = "Sent succesfully";
+            btnDisabled = true;
+          }
+          if (waitingForTx && nextBatchSendIndex == i) {
+            btnText = "Waiting for tx to be mined...";
             btnDisabled = true;
           }
           return (
