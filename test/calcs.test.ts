@@ -6,7 +6,7 @@ import {
   calcFullDistribution,
   splitDistribution,
 } from "../website/src/utils/calcs";
-import { SendParams } from "../website/src/components/types";
+import { SendBatch } from "../website/src/components/types";
 
 describe("Reward calculations", function () {
   let accounts: SignerWithAddress[];
@@ -36,9 +36,21 @@ describe("Reward calculations", function () {
     await token.deployed();
   });
 
+  const dummyUpdater = (
+    holderAmount: number,
+    holderBalanceAmount: number,
+    total: number,
+    totalHoldersToCheck: number
+  ) => {};
+
   it("Single holder, gets all rewards", async function () {
     const giveRewards = BigNumber.from("1000");
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
@@ -50,7 +62,12 @@ describe("Reward calculations", function () {
   it("Single new holder, gets all rewards", async function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply);
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
@@ -62,7 +79,12 @@ describe("Reward calculations", function () {
   it("Two equal holders divide the reward equally", async function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 2);
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(2);
@@ -76,7 +98,12 @@ describe("Reward calculations", function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 3);
     await token.transfer(user2.address, tokenSupply / 3);
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(3);
@@ -93,7 +120,12 @@ describe("Reward calculations", function () {
   it("Two inequal holders divide the reward inequally", async function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 3);
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(2);
@@ -107,7 +139,12 @@ describe("Reward calculations", function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 5);
     await token.transfer(user2.address, (tokenSupply / 10) * 3);
-    const dist = await calcFullDistribution(token, giveRewards, []);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(3);
@@ -120,9 +157,12 @@ describe("Reward calculations", function () {
 
   it("Single blacklisted holder", async function () {
     const giveRewards = BigNumber.from("1000");
-    const dist = await calcFullDistribution(token, giveRewards, [
-      { address: owner.address, title: "" },
-    ]);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [{ address: owner.address, title: "" }],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(0);
@@ -132,9 +172,12 @@ describe("Reward calculations", function () {
   it("One blacklisted is removed", async function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 2);
-    const dist = await calcFullDistribution(token, giveRewards, [
-      { address: user1.address, title: "" },
-    ]);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [{ address: user1.address, title: "" }],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
@@ -147,10 +190,15 @@ describe("Reward calculations", function () {
     const giveRewards = BigNumber.from("1000");
     await token.transfer(user1.address, tokenSupply / 10);
     await token.transfer(user2.address, tokenSupply / 5);
-    const dist = await calcFullDistribution(token, giveRewards, [
-      { address: user1.address, title: "" },
-      { address: user2.address, title: "" },
-    ]);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [
+        { address: user1.address, title: "" },
+        { address: user2.address, title: "" },
+      ],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(1);
@@ -166,10 +214,15 @@ describe("Reward calculations", function () {
     await token.transfer(user2.address, tokenSupply / 5); // 20%
     await token.transfer(user3.address, tokenSupply / 4); // 25%
     // owner 50%
-    const dist = await calcFullDistribution(token, giveRewards, [
-      { address: user1.address, title: "" },
-      { address: user2.address, title: "" },
-    ]);
+    const dist = await calcFullDistribution(
+      token,
+      giveRewards,
+      [
+        { address: user1.address, title: "" },
+        { address: user2.address, title: "" },
+      ],
+      dummyUpdater
+    );
 
     expect(dist.totalAmount).to.equal(giveRewards);
     expect(dist.addresses.length).to.equal(2);
@@ -221,11 +274,14 @@ describe("Reward list splitting", function () {
   });
 
   it("No splitting needed", async function () {
-    let params: SendParams = {
+    var params: SendBatch = {
       addresses: ["a"],
       amounts: [getNum(1)],
       totalAmount: BigNumber.from("0"),
     };
+    /*    let params: SendParams = {
+      
+    }; */
     const split = splitDistribution(params, 50);
     expect(split.length).to.equal(1);
     expect(split[0].addresses.length).to.equal(1);
@@ -242,7 +298,7 @@ describe("Reward list splitting", function () {
       getNum(5),
       getNum(6),
     ];
-    let params: SendParams = {
+    let params: SendBatch = {
       addresses: addresses,
       amounts: amounts,
       totalAmount: BigNumber.from("21"),
@@ -272,7 +328,7 @@ describe("Reward list splitting", function () {
   it("Inequal split", async function () {
     const addresses = ["a", "b", "c", "d", "e"];
     const amounts = [getNum(1), getNum(2), getNum(3), getNum(4), getNum(5)];
-    let params: SendParams = {
+    let params: SendBatch = {
       addresses: addresses,
       amounts: amounts,
       totalAmount: BigNumber.from("15"),
