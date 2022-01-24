@@ -9,7 +9,7 @@ const useRewards = useReverterRewards
   : "SimpleRewards";
 
 const mintBatch = 50;
-const holderAmount = 100;
+const holderAmount = 1000;
 
 interface Holder {
   address: string;

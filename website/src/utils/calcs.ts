@@ -53,25 +53,20 @@ export const calcFullDistribution = async (
     totalHoldersToCheck: number
   ) => void
 ): Promise<SendBatch> => {
-  console.log("starting");
-
   const holders = await getHolders(contract, updateHoldersReceived);
-  console.log("got holders", holders.length, blacklist.length);
   let afterBlacklistRemovalHolders: string[] = [...holders];
   let totalBalance: BigNumber = BigNumber.from("0");
 
   for (let i = 0; i < blacklist.length; i++) {
-    //const balance = await contract.balanceOf(blacklist[i].address);
-    console.log("blacklisted", blacklist[i].address);
     afterBlacklistRemovalHolders = afterBlacklistRemovalHolders.filter(
       (h) => h !== blacklist[i].address
     );
   }
-  console.log(
+  /*   console.log(
     "now holders",
     afterBlacklistRemovalHolders.length,
     blacklist.length
-  );
+  ); */
 
   var balances: BigNumber[] = [];
 

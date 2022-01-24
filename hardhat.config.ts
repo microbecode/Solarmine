@@ -3,6 +3,7 @@
 import "@nomiclabs/hardhat-waffle";
 import dotenv from "dotenv";
 import "@nomiclabs/hardhat-etherscan";
+import "hardhat-gas-reporter";
 dotenv.config();
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -20,7 +21,7 @@ module.exports = {
     hardhat: {
       blockGasLimit: 80000000,
       initialBaseFeePerGas: 0, // workaround from https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136 . Remove when that issue is closed.
-      /*       mining: {
+      /*    mining: {
         auto: false,
         interval: 5000,
       }, */
@@ -34,10 +35,10 @@ module.exports = {
   mocha: {
     timeout: 200000,
   },
-  /*   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+  gasReporter: {
+    enabled: false,
     currency: "USD",
-  }, */
+  },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },

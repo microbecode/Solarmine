@@ -15,7 +15,7 @@ import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
 
 const isTest = true;
-const batchSize = 50;
+const batchSize = 500; // 500 results in gas cost of about 18m
 
 enum Env {
   Local,
@@ -321,7 +321,7 @@ export function UI(props: Props) {
         </div>
       )}
       <div>Previous tx hash: {previousTxHash}</div>
-      <div>Batches </div>
+      <div>Batches: </div>
       <div>
         {sendBatches.map((batch, i) => {
           const text = getDisplayForBatch(batch, i);
