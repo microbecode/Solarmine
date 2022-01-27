@@ -213,6 +213,24 @@ export function UI(props: Props) {
       setWaitingForTx(false);
       console.log("got final", final);
 
+      // For debugging
+      const checkBalances = async () => {
+        for (let i = 0; i < 1000000000; i++) {} // sleep a bit first
+        console.log("ready");
+
+        for (let i = 0; i < batch.addresses.length; i++) {
+          const balance = await provider.getBalance(batch.addresses[i]);
+          console.log(
+            "address balance",
+            batch.addresses[i],
+            balance.toString()
+          );
+        }
+      };
+      //await checkBalances();
+
+      /**/
+
       setNextBatchSendIndex(nextBatchSendIndex + 1);
     } catch (ex: any) {
       console.error("exxx", ex);
@@ -279,7 +297,7 @@ export function UI(props: Props) {
     const bals: BigNumber[] = [];
     const addrs: string[] = [];
 
-    addrs.push("0x6100000000000000000000000000000000000001");
+    addrs.push("0x6100000000000000000000000000000000000034");
     addrs.push("0x6100000000000000000000000000000000000002");
     addrs.push("0x6100000000000000000000000000000000000008");
 
