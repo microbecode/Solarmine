@@ -9,7 +9,7 @@ const useRewards = useReverterRewards
   : "SimpleRewards";
 
 const mintBatch = 50;
-const holderAmount = 1000;
+const holderAmount = 100;
 
 interface Holder {
   address: string;
@@ -57,10 +57,21 @@ const giveTokens = async (
   }
 };
 
+const giveFew = async (token: Contract, amounts: BigNumber[]) => {
+  let prefixNum = ethers.BigNumber.from("10").pow(38);
+  for (let i = 0; i < amounts.length; i++) {
+    const addr = "0x6" + prefixNum.add(i).toString();
+    await token.mint(addr, amounts[i]);
+  }
+};
+
 async function main() {
+  const accounts = await hre.ethers.getSigners();
+
   const mintableSupply = BigNumber.from(10000).mul(
     BigNumber.from("10").pow("18")
   );
+  const zero = BigNumber.from("0");
   const initialSupply = BigNumber.from(1).mul(BigNumber.from("10").pow("18"));
 
   const tokenFact = await ethers.getContractFactory("MyTokenMock");
@@ -83,6 +94,12 @@ async function main() {
   await verifyContracts(token.address, initialSupply, rewards.address);
 
   await giveTokens(token, holderAmount, mintableSupply);
+  /*   await token.burn(accounts[0].address, initialSupply); // burn his tokens so totalSupply is zero
+  await token.mint(
+    "0x6100000000000000000000000000000000000008",
+    BigNumber.from("3")
+  ); // give some tokens for a blacklisted address
+  await giveFew(token, [BigNumber.from("1"), BigNumber.from("2")]); */
 
   console.log("All done");
 }

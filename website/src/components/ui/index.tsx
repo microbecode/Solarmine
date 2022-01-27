@@ -15,7 +15,7 @@ import Token from "../../contracts/Token.json";
 import Rewards from "../../contracts/Rewards.json";
 
 const isTest = true;
-const batchSize = 500; // 500 results in gas cost of about 18m
+const batchSize = 50; // 500 results in gas cost of about 18m
 
 enum Env {
   Local,
@@ -274,6 +274,21 @@ export function UI(props: Props) {
     element.click();
   };
 
+  // Used only for local testing
+  const checkSomeBalances = async () => {
+    const bals: BigNumber[] = [];
+    const addrs: string[] = [];
+
+    addrs.push("0x6100000000000000000000000000000000000001");
+    addrs.push("0x6100000000000000000000000000000000000002");
+    addrs.push("0x6100000000000000000000000000000000000008");
+
+    for (let i = 0; i < addrs.length; i++) {
+      const balance = await provider.getBalance(addrs[i]);
+      console.log("address balance", addrs[i], balance.toString());
+    }
+  };
+
   return (
     <div className="create-container pt-5 pb-0 px-5" id="what">
       <div>Used environment: {usedEnv}</div>
@@ -317,6 +332,12 @@ export function UI(props: Props) {
             type="button"
             value="Download data file"
             onClick={exportData}
+          ></input>
+          <input
+            type="button"
+            value="Test"
+            onClick={checkSomeBalances}
+            hidden={usedEnv !== Env[Env.Local].toString()}
           ></input>
         </div>
       )}

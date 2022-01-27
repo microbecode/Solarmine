@@ -85,7 +85,7 @@ export const calcFullDistribution = async (
 
     totalBalance = totalBalance.add(balance);
   }
-  console.log("using total balance " + totalBalance.toString());
+  //console.log("using total balance " + totalBalance.toString());
 
   // Used to avoid rounding issues
   const tempMultiplier = BigNumber.from("10").pow(BigNumber.from("15"));
@@ -144,7 +144,6 @@ const getHolders = async (
       offset
     )) as string[];
     allHolders = allHolders.concat(batchHolders);
-    console.log("have holders: " + allHolders.length);
     if (updateHoldersReceived) {
       updateHoldersReceived(allHolders.length, 0, total, allHolders.length);
     }
