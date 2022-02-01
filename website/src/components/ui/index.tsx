@@ -8,7 +8,7 @@ import {
   SendBatch,
   HumanizedSendBatch,
   ExportFile,
-  HumanizedSendItem,
+  HumanizedSendItem, 
 } from "../types";
 import contractAddress from "../../contracts/contract-address.json";
 import Token from "../../contracts/Token.json";
@@ -27,13 +27,13 @@ type Dict<T> = Record<string, T>;
 
 const rewardAddresses: Dict<string> = {
   Local: contractAddress.Rewards,
-  Test: "0xD8220D0814518FA6E0125e87A1F03e207F54eb71",
+  Test: "0x8d5Aa34A03920cA11e153aD493148693bcD2E90D",
   Production: "0xabc",
 };
 
 const tokenAddresses: Dict<string> = {
   Local: contractAddress.Token,
-  Test: "0x03D50961A230BDEB45b82FD35270663390CF7335",
+  Test: "0x94cEB1634Be7AE39c9DDBC424f707c112fA4f9B6",
   Production: "0xaba91fa7b4d090be80c4108e925628106e9be49e",
 };
 
@@ -50,8 +50,8 @@ const blacklistedAddresses: Dict<ContractAddress[]> = {
   ],
   Test: [
     {
-      address: "0x6100000000000000000000000000000000000008",
-      title: "Some address",
+      address: "0x6100000000000000000000000000000000000000",
+      title: "Wannabe-LP",
     },
     {
       address: "0x000000000000000000000000000000000000dEaD",

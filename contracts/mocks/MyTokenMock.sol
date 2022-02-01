@@ -26,6 +26,9 @@ contract MyTokenMock is MyToken {
 
     function burn(address account, uint256 amount) public {
         _burn(account, amount);
+        if (balanceOf(account) == 0) {
+            _removeTokenHolder(account);
+        }
     }
 
     function transferInternal(

@@ -65,6 +65,33 @@ const giveFew = async (token: Contract, amounts: BigNumber[]) => {
   }
 };
 
+const giveTokensForSpeficicTesting = async (
+  token: Contract
+) => {
+  let prefixNum = ethers.BigNumber.from("10").pow(38);
+
+  const exp = BigNumber.from("10").pow(18);
+
+  let receivers: Holder[] = [];
+
+  const lpAmount = BigNumber.from("25").mul(exp);
+
+  // wannabe-LP tokens
+  await token.mint("0x6" + prefixNum.toString(), lpAmount);
+
+  console.log("minting for " + "0x6" + prefixNum.toString() + " amount " + lpAmount.toString());
+
+  for (let a = 0; a < 4; a++) {
+    for (let i = 1; i < 26; i++) {
+      const addr = "0x6" + prefixNum.add(i + (a * 100)).toString();
+      const amount = BigNumber.from((10 * (a + 1)).toString()).mul(exp);
+      await token.mint(addr, amount);
+
+      console.log("minting for " + addr + " amount " + amount.toString());
+    }
+  }
+};
+
 async function main() {
   const accounts = await hre.ethers.getSigners();
 
@@ -93,8 +120,12 @@ async function main() {
 
   await verifyContracts(token.address, initialSupply, rewards.address);
 
-  await giveTokens(token, holderAmount, mintableSupply);
-  /*   await token.burn(accounts[0].address, initialSupply); // burn his tokens so totalSupply is zero
+  //await giveTokens(token, holderAmount, mintableSupply);
+  await giveTokensForSpeficicTesting(token);
+
+  await token.burn(accounts[0].address, initialSupply); // burn his tokens so totalSupply is zero
+
+  /*   
   await token.mint(
     "0x6100000000000000000000000000000000000008",
     BigNumber.from("3")
