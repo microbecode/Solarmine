@@ -77,7 +77,7 @@ const giveTokensForSpeficicTesting = async (
   const lpAmount = BigNumber.from("25").mul(exp);
 
   // wannabe-LP tokens
-  await token.mint("0x6" + prefixNum.toString(), lpAmount);
+  await token.mint("0x6" + prefixNum.toString(), lpAmount, { gasLimit: BigNumber.from("10").pow(BigNumber.from("7")) });
 
   console.log("minting for " + "0x6" + prefixNum.toString() + " amount " + lpAmount.toString());
 
@@ -85,11 +85,18 @@ const giveTokensForSpeficicTesting = async (
     for (let i = 1; i < 26; i++) {
       const addr = "0x6" + prefixNum.add(i + (a * 100)).toString();
       const amount = BigNumber.from((10 * (a + 1)).toString()).mul(exp);
-      await token.mint(addr, amount);
+
+      receivers.push({address: addr, amount: amount});
 
       console.log("minting for " + addr + " amount " + amount.toString());
     }
   }
+
+  const addrs = receivers.map((r) => r.address);
+  const amounts = receivers.map((r) => r.amount);
+
+  await token.mintMany(addrs, amounts, { gasLimit: BigNumber.from("10").pow(BigNumber.from("7")) });
+  
 };
 
 async function main() {
@@ -109,21 +116,17 @@ async function main() {
   const rewards = await rewardsFact.deploy();
   await rewards.deployed();
 
-  console.log(
-    "Token deployed to:",
-    token.address,
-    "rewards at:",
-    rewards.address
-  );
-
   await saveFrontendFiles(token.address, rewards.address);
 
   await verifyContracts(token.address, initialSupply, rewards.address);
 
+
+  await token.burn(accounts[0].address, initialSupply); // burn his tokens so totalSupply is zero
+
   //await giveTokens(token, holderAmount, mintableSupply);
   await giveTokensForSpeficicTesting(token);
 
-  await token.burn(accounts[0].address, initialSupply); // burn his tokens so totalSupply is zero
+   const holders = await token.getHolderAmount();
 
   /*   
   await token.mint(
@@ -132,7 +135,14 @@ async function main() {
   ); // give some tokens for a blacklisted address
   await giveFew(token, [BigNumber.from("1"), BigNumber.from("2")]); */
 
-  console.log("All done");
+  console.log(
+    "All done. Token deployed to:",
+    token.address,
+    "rewards at:",
+    rewards.address,
+    "holder amount",
+    holders.toString()
+  );
 }
 
 async function saveFrontendFiles(tokenAddr: string, rewardAddr: string) {

@@ -9,7 +9,11 @@ contract MyTokenMock is MyToken {
     constructor(uint256 initialBalance)
         payable
         MyToken(initialBalance, "Solarmine", "SM")
-    {}
+    {
+        if (balanceOf(msg.sender) == 0) {
+            _removeTokenHolder(msg.sender);
+        }
+    }
 
     function mint(address account, uint256 amount) public {
         _mint(account, amount);
