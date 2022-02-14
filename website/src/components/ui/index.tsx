@@ -1,4 +1,3 @@
-import axios from "axios";
 import { BigNumber, ethers } from "ethers";
 import { getChainByChainId } from "evm-chains";
 import { useEffect, useState } from "react";
@@ -307,11 +306,18 @@ export function UI(props: Props) {
     }
   };
 
+  const scannerUrl = usedEnv == Env[Env.Local].toString() ? null : 
+    usedEnv == Env[Env.Test].toString() ? `https://testnet.bscscan.com/address/${usedToken}#readContract` :
+   `https://bscscan.com/address/${usedToken}#readContract`;
+
   return (
     <div className="create-container pt-5 pb-0 px-5" id="what">
       <div>Used environment: {usedEnv}</div>
       <div>Your wallet: {props.walletAddress}</div>{" "}
-      <div>Used token: {usedToken}</div>
+      <div>
+        {scannerUrl && <>Used token: <a target='_blank' href={scannerUrl}>{usedToken}</a></>}
+        {!scannerUrl && <>Used token:{usedToken}</> }
+        </div>
       <div>
         Blacklisted addresses:{" "}
         {usedBlacklist.map((b, i) => (
