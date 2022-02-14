@@ -1,26 +1,29 @@
 # Reward platform for Solarmine
 
-This repository contains codes for creating an ERC20 token and a rewards platform for the <a href='http://solarminecoin.com/'>Solarmine</a> project.
+This repository contains codes for creating an ERC20 token and a rewards platform (frontend and contract) for the <a href='http://solarminecoin.com/'>Solarmine</a> project.
 
 ## Contents
 
-This repository contains two main contracts:
+This repository contains two main contracts and one website:
 1. An ERC20 token with some added functionality
-1. A rewarding contract
+1. A reward contract
+1. A web frontend for distributing rewards
 
 ## Technologies
 
-This repository is implemented with Solidity on top of an Ethereum framework. The actual deployment of the contracts will happen to the BSC network - the deployment settings in this repository will not be valid for BSC.
+This repository is implemented with Solidity on top of an Ethereum framework. The actual deployment of the contracts will happen to the BSC network.
 
 ### Used versions
 * Solidity 0.8.x for contracts
 * Hardhat for local execution and test environment
 * Chai/Mocha/Waffle/Ethers for unit tests
+* React.js for rewards frontend
 
 ### Installation
 
 To start using this repository, you'll need to have `yarn` installed.
 After that, you should be able to just go to the root directory and write `yarn` and it'll download the required packages.
+Similarily, for the frontend, go to the `website` folder and write `yarn`.
 
 ## Smart contracts
 
@@ -36,15 +39,28 @@ The custom functionality does not interfere with the default token functionality
 
 This contract is used to distribute rewards to token holders. Every token holder gets a share of the given rewards. The size of the share depends on the amount of tokens the holder has.
 
-The rewards contract reads token data from the `MyToken` contract address, but it has no access to write anything there.
+The contract acts as a simple relayer which splits the given reward based on the provided distribution. The rewards are given in the native asset of the blockchain (for example, BNB in Binance Smart Chain). 
 
-The rewards are given in the native asset of the blockchain (for example, BNB in Binance Smart Chain). The reward distribution is performed by calling the `notifyRewards` function with transaction `value` being the amount of rewards to distribute.
+## Frontend
 
-#### Blacklisted address
+The web frontend is used to facilitate reward distribution. It takes care of the following aspects:
 
-One address is blacklisted and is not considered when distributing rewards. For the sake of the reward calculations, token balance of the blacklisted address is deducted from the total token supply. The blacklisted address is the liquidity pool which contains a big portion of the tokens.
+* Ask the user for the amount of rewards he wants to distribute
+* Get all of the token holders
+* Calculate how the tokens should be distributed to the holders, taking into account the blacklisted addresses
+* Split the rewards into batches, which are of the right size to be sent to the rewards contract
 
-#### Example distribution
+Once the batches have been calculated, the user is presented with the option to start distributing the batches. They can be distributed sequentially - you have to wait for the previous batch to finish before distributing the next one.
+
+You can also download an extract of the calculated rewards. The extract will also include transaction information for those addresses for which the rewards were already distributed.
+
+IMPORTANT: **DO NOT REFRESH THE BROWSER DURING THE REWARD DISTRIBUTION**. Otherwise only some of the rewards get sent and there is no possibility to continue the process from some batch which is not the first one. If something goes wrong during reward distribution, download the extract and contact the developer.
+
+### Blacklisted address
+
+An arbitrary amount of addresses can be blacklisted and they are not considered when distributing rewards. At least the liquidity pool address is added in the blacklist so that rewards would not be distributed to that address.
+
+### Example distribution
 
 Let's say there are token holders with the following distribution:
 * Owner1: 10%
@@ -52,57 +68,28 @@ Let's say there are token holders with the following distribution:
 * Owner3: 15%
 * Owner4: 25%
 
-Let us further say that the contract is sent 100 rewards and the token's total supply is 1000.
-First we reduce the balance of the blacklisted address, so for the calculations the total supply is 500. Since we also don't give rewards to the blacklisted address, its share of the tokens is ignored. Therefore, the three remaining owners get rewards with the following distribution:
+Let us further say that you want to distribute 100 rewards and the token's total supply is 1000.
+First the frontend reduces the balance of the blacklisted addresses, so for the calculations the total supply is 500. Since we also don't give rewards to the blacklisted address, its share of the tokens is ignored. Therefore, the three remaining owners get rewards with the following distribution:
 * Owner1: 20% of 100
 * Owner3: 30% of 100
 * Owner4: 50% of 100
 
-#### Batch reward sending
-
-Since we are looping through all of the token holders, the solution doesn't fully scale if there are too many holders. Once a certain holder amount is reached, the distribution can't be executed anymore since its gas requirements are above the blockchain's block gas limit. In BSC network, the limit is somewhere around 2000 token holders.
-
-To mitigate this issue, the rewards can be sent in batches.
-
-There are two main phases in batch sending:
-1. Initiate the batch process (`initiateBatch` function), which does the following:
-    1. Takes a snapshot of the token's current data (token holders, their balances and stuff like that)
-    1. Ignores possibly blacklisted address for the reward calculations
-    1. Stores the given reward amount to be used for the batches
-    1. This function takes parameter `batchSize` which is the desired size for the batches. Also the rewards are given as `value` for the function
-1. Start processing the batches (`processBatch` function), which does the following:
-    1. Processes the next batch
-    1. Call this function as many times as needed until all of the batches are processed. Once the last batch is processed, event `BatchCompleted` is emitted and the batch process is ended. Also, calling this function without a running batch reverts the transaction.
-    1. This function takes no parameters
-
-**Example**
-
-Let's say there are 10 token holders and you want to distribute 100 rewards in 3 batches. You do the following:
-1. Call `initiateBatch` with *4* as the `batchSize`. The batches will therefore be: 4 + 4 + 2 (equals 10 token holders).
-1. Call `processBatch` three times
+The distribution is then divided into batches, unless it fits within a single batch.
 
 ## Deployment
 
-To deploy the contracts, you need to do the following things:
-1. Deploy the token `MyToken`
-1. Deploy the reward contract. Give the deployed token address and the LP pool address as parameters
+Manual deployment is easiest with flattened contracts. You can get flattened contracts with: `npx hardhat flatten contracts/SimpleRewards.sol > rewards.sol.txt` (not using the direct .sol suffix because it would cause conflicting contract names).
 
-There is an example deployment script in *scripts/deploy.js*. If you have Hardhat installed, you can run it (locally) with: `npx hardhat run scripts/deploy.js --network hardhat`.
-If you use the example deployment script, remember the following things:
-* Before deploying the token, remember to change the `tokenSupply`, `name` and `symbol`
-* After deploying the token, you need to create the liquidity pool with it
-* Once you have the liquidity pool setup, get its address and supply that as a parameter (`blacklistAddress`) to the reward contract, upon deployment. The parameter `underlying` is the token address
-
-So, in reality, you can't deploy everything with just the script, since you need to go create the LP after token deployment, but before rewards deployment.
+If you are developmentally-oriented you can also deploy with the associated Hardhat deployment script.
 
 ## Verifying the contracts
 
-If the contracts need to be verified in some external service it's probably easiest to first create a flattened file of all of the contracts. This can be done with Hardhat: *npx hardhat flatten > flat.sol.txt* (not using the direct .sol suffix because it would cause conflicting contract names).
+Manually verifying the contracts is easiest if the flattened contract is used for deployment.
 
-The problem with the flattener is that the licensing comments are also included, one per each contract file. This is not acceptable for deployment, so you will need to manually remove the licensing lines from the flattened file (all of them except the first one). So remove each line which looks something like this: `// SPDX-License-Identifier: MIT` - except the first one.
+The problem with the flattener is that the licensing comments are also included, one per each contract file. This is not acceptable for deployment, so you will need to manually remove the licensing lines from the flattened file (all of them except the first one). So remove each line which looks something like this: `// SPDX-License-Identifier: MIT` - except the first one. After that, it should be acceptable for the verifier.
 
 ## Unit tests
 
 All of the written contracts are covered with automated unit tests.
-You can browse the tests in the *test* folder, and you can run them with Hardhat: *npx hardhat test*
+You can browse the tests in the *test* folder, and you can run them with Hardhat: `npx hardhat test`
 
